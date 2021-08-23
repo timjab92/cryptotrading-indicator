@@ -1,0 +1,3 @@
+def crypto():
+
+    print("crypto")
