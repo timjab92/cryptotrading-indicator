@@ -1,3 +1,0 @@
-def crypto():
-
-    print("crypto")
