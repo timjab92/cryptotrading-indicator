@@ -57,7 +57,7 @@ fig.update_layout(title='Bitcoin price', autosize=True,
                 #   width=1000, height=400,
                   margin=dict(l=40, r=40, b=40, t=40),
                   xaxis =  {'showgrid': False},
-                  yaxis = {'showgrid': False})
+                  yaxis = {'showgrid': False, "tickformat" : "$ .2f"})
 
 
 st.plotly_chart(fig)
