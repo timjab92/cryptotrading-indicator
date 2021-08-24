@@ -11,6 +11,8 @@ st.set_page_config(
     layout="centered", # wide
     initial_sidebar_state="auto") # collapsed
 
+data = pd.read_csv("raw_data/BTC-USD.csv")
+data["Date"] = pd.to_datetime(data["Date"], format='%Y-%m-%d')
 
 ## SIDEBAR
 st.sidebar.markdown(f"""
@@ -26,19 +28,21 @@ d = st.sidebar.date_input(
     date.today()-timedelta(days=720))
 
 d=  d.strftime("%Y-%m-%d")
-# st.sidebar.write(d)
 
+# RESET TO SEE ALL DATA
+# but1, but2, but3 = st.sidebar.columns(3)
+# if but2.button('Reset graph'):
+if st.sidebar.button('    Reset graph    '):
+    d = data.Date[0]
 
 
 '''
-# Cryptocurrency price estimation from an LSTM-based algorithm
+# Cryptocurrency price estimation from a LSTM algorithm
 '''
-
-
-data = pd.read_csv("raw_data/BTC-USD.csv")
-data["Date"] = pd.to_datetime(data["Date"], format='%Y-%m-%d')
+    
 mask = (data['Date'] > d) & (data['Date'] <= datetime.today())
 filtered_data = data.loc[mask]
+
 
 # st.write('Bitcoin price')
 # fig1, ax = plt.subplots(1,1, figsize=(15,10))
@@ -58,7 +62,34 @@ fig.update_layout(
                 autosize=True,
                 #   width=1000, height=400,
                   margin=dict(l=40, r=40, b=40, t=40),
-                  xaxis =  {'showgrid': False},
+                  xaxis=dict(
+        rangeselector=dict(
+            buttons=list([
+                dict(count=1,
+                     label="1m",
+                     step="month",
+                     stepmode="backward",),
+                dict(count=6,
+                     label="6m",
+                     step="month",
+                     stepmode="backward"),
+                dict(count=1,
+                     label="YTD",
+                     step="year",
+                     stepmode="todate"),
+                dict(count=1,
+                     label="1y",
+                     step="year",
+                     stepmode="backward"),
+                dict(step="all")
+            ])
+        ),
+        rangeslider=dict(
+            visible=True
+        ),
+        type="date",
+        showgrid = False
+    ),         
                   yaxis = {'showgrid': False, 
                            "separatethousands": True,
                            'autorange': True,
@@ -68,6 +99,11 @@ fig.update_layout(
 
 st.plotly_chart(fig)
 
+
+
+fig.update_layout(
+    
+)
 
 
 
