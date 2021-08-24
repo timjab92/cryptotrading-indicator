@@ -53,7 +53,9 @@ fig = go.Figure(data=[go.Candlestick(x=filtered_data['Date'],
                 high=filtered_data['High'],
                 low=filtered_data['Low'],
                 close=filtered_data['Close'])])
-fig.update_layout(title='Bitcoin price', autosize=True,
+fig.update_layout(
+                # title='Bitcoin price',
+                autosize=True,
                 #   width=1000, height=400,
                   margin=dict(l=40, r=40, b=40, t=40),
                   xaxis =  {'showgrid': False},
