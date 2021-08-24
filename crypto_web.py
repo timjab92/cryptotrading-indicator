@@ -3,14 +3,33 @@ import pandas as pd
 import matplotlib.pyplot as plt
 import plotly.graph_objects as go
 # import requests
-# from datetime import datetime, date
+from datetime import datetime, date, timedelta
 
 st.set_page_config(
     page_title="Crypto Trading", # => Quick reference - Streamlit
     page_icon="💰",
     layout="centered", # wide
     initial_sidebar_state="auto") # collapsed
-    
+
+
+## SIDEBAR
+st.sidebar.markdown(f"""
+    # Crypto Indicator
+    """)
+
+coin = st.sidebar.selectbox(label="Cryptocurrency",
+                                options=("Bitcoin",
+                                         "Ethereum"))
+
+d = st.sidebar.date_input(
+    "Select the start date for visualization",
+    date.today()-timedelta(days=720))
+
+d=  d.strftime("%Y-%m-%d")
+# st.sidebar.write(d)
+
+
+  
 '''
 # Cryptocurrency price estimation from an LSTM-based algorithm
 '''
@@ -18,25 +37,32 @@ st.set_page_config(
 
 data = pd.read_csv("raw_data/BTC-USD.csv")
 data["Date"] = pd.to_datetime(data["Date"], format='%Y-%m-%d')
-st.write('Bitcoin price')
-plt.plot(data["Date"][:20], data["Close"][:20])
-# plt.plot(data["Date"][:20], data["Adj Close"][:20])
-plt.ylabel("BTC price (USD)")
-plt.show()
+mask = (data['Date'] > d) & (data['Date'] <= datetime.today())
+filtered_data = data.loc[mask]
 
 # st.write('Bitcoin price')
-# fig = go.Figure(data=[go.Candlestick(x=data['Date'],
-#                 open=data['Open'],
-#                 high=data['High'],
-#                 low=data['Low'],
-#                 close=data['Close'])])
+# fig1, ax = plt.subplots(1,1, figsize=(15,10))
+# ax.plot(data["Date"], data["Adj Close"])
+# ax.set_ylabel("BTC price (USD)")
+# st.write(fig1)
+# st.line_chart(data=data['Adj Close'], width=0, height=0, use_container_width=True)
 
-# fig.show()
+st.write('Bitcoin price')
+fig = go.Figure(data=[go.Candlestick(x=filtered_data['Date'],
+                open=filtered_data['Open'],
+                high=filtered_data['High'],
+                low=filtered_data['Low'],
+                close=filtered_data['Close'])])
+fig.update_layout(title='Bitcoin price', autosize=True,
+                #   width=1000, height=400,
+                  margin=dict(l=40, r=40, b=40, t=40),
+                  xaxis =  {'showgrid': False},
+                  yaxis = {'showgrid': False})
+                  
+
+st.plotly_chart(fig)
 
 
-st.sidebar.markdown(f"""
-    # Crypto Indicator
-    """)
 
 
 
