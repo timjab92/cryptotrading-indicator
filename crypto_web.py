@@ -47,7 +47,7 @@ filtered_data = data.loc[mask]
 # st.write(fig1)
 # st.line_chart(data=data['Adj Close'], width=0, height=0, use_container_width=True)
 
-st.write('Bitcoin price')
+
 fig = go.Figure(data=[go.Candlestick(x=filtered_data['Date'],
                 open=filtered_data['Open'],
                 high=filtered_data['High'],
