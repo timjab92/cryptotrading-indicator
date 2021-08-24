@@ -7,7 +7,7 @@ import plotly.graph_objects as go
 
 st.set_page_config(
     page_title="Crypto Trading", # => Quick reference - Streamlit
-    page_icon="💸",
+    page_icon="💰",
     layout="centered", # wide
     initial_sidebar_state="auto") # collapsed
     
@@ -16,24 +16,22 @@ st.set_page_config(
 '''
 
 
-
-#Yahoo Finance Data
 data = pd.read_csv("raw_data/BTC-USD.csv")
 data["Date"] = pd.to_datetime(data["Date"], format='%Y-%m-%d')
-# st.write('Bitcoin price')
-# plt.plot(data["Date"], data["Close"])
-# plt.plot(data["Date"], data["Adj Close"])
-# plt.ylabel("BTC price (USD)")
-# plt.show()
-
 st.write('Bitcoin price')
-fig = go.Figure(data=[go.Candlestick(x=data['Date'],
-                open=data['Open'],
-                high=data['High'],
-                low=data['Low'],
-                close=data['Close'])])
+plt.plot(data["Date"][:20], data["Close"][:20])
+# plt.plot(data["Date"][:20], data["Adj Close"][:20])
+plt.ylabel("BTC price (USD)")
+plt.show()
 
-fig.show()
+# st.write('Bitcoin price')
+# fig = go.Figure(data=[go.Candlestick(x=data['Date'],
+#                 open=data['Open'],
+#                 high=data['High'],
+#                 low=data['Low'],
+#                 close=data['Close'])])
+
+# fig.show()
 
 
 st.sidebar.markdown(f"""
