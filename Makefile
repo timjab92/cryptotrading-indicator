@@ -45,6 +45,7 @@ count_lines:
 #      UPLOAD PACKAGE TO PYPI
 # ----------------------------------
 PYPI_USERNAME=<AUTHOR>
+APP_NAME = crypto-indicator
 build:
 	@python setup.py sdist bdist_wheel
 
@@ -53,3 +54,16 @@ pypi_test:
 
 pypi:
 	@twine upload dist/* -u $(PYPI_USERNAME)
+
+streamlit:
+	-@streamlit run crypto_web.py
+
+heroku_login:
+	-@heroku login
+
+heroku_create_app:
+	-@heroku create ${APP_NAME}
+
+deploy_heroku:
+	-@git push heroku master
+	-@heroku ps:scale web=1

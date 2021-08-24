@@ -1,0 +1,1 @@
+web: pip install . -U && cryptotradingindicator-run && sh setup.sh && streamlit run crypto_web.py
