@@ -29,7 +29,7 @@ d=  d.strftime("%Y-%m-%d")
 # st.sidebar.write(d)
 
 
-  
+
 '''
 # Cryptocurrency price estimation from an LSTM-based algorithm
 '''
@@ -58,7 +58,7 @@ fig.update_layout(title='Bitcoin price', autosize=True,
                   margin=dict(l=40, r=40, b=40, t=40),
                   xaxis =  {'showgrid': False},
                   yaxis = {'showgrid': False})
-                  
+
 
 st.plotly_chart(fig)
 
@@ -67,7 +67,6 @@ st.plotly_chart(fig)
 
 
 ## Add controlers to ask user for input
-
 
 ## Call api
 # url = 'https://taxifare-xyj6jtab4q-ew.a.run.app/predict'
@@ -79,3 +78,4 @@ st.plotly_chart(fig)
 # response = requests.get(url, params=params).json()
 
 # st.text('The taxi ride might cost you around {0:.3g}'.format(response["prediction"]))
+
