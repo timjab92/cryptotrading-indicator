@@ -59,7 +59,7 @@ fig.update_layout(title='Bitcoin price', autosize=True,
                   xaxis =  {'showgrid': False},
                   yaxis = {'showgrid': False, 
                            "separatethousands": True,
-                           'autorange': 'true',
+                           'autorange': True,
                            "tickprefix":'$',
                            "tickformat" : " ,.2f"})
 
