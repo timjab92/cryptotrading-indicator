@@ -8,7 +8,7 @@ BUCKET_NAME="crypto-indicator"
 
 
 # @simple_time_tracker
-def get_data(nrows=10000, local=False, **kwargs):
+def get_gcp_data(nrows=10000, local=False, **kwargs):
     """method to get the training data (or a portion of it) from google cloud bucket"""
     # Add Client() here
     if local:
@@ -30,4 +30,4 @@ if __name__ == "__main__":
     params = dict(nrows=1000,
                   local=False,  # set to False to get data from GCP (Storage or BigQuery)
                   )
-    df = get_data(**params)
+    df = get_gcp_data(**params)
