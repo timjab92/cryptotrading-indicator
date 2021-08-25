@@ -1,5 +1,6 @@
 from cryptotradingindicator.utils import computeRSI, stoch_rsi, get_bollinger_bands
 import pandas as pd
+import os
 
 def hello_world():
     return "Hello, crypto trader!!"
@@ -12,7 +13,8 @@ def get_csv_data():
     Returns the raw training dataset for the price of bitcoin since 31.12.2011.
     The index is set to the date.
     """
-    data = pd.read_csv("../data/BTCUSD_2011-12-31_to_2021-08-23_4hours_Clean.csv")
+    path= os.path.dirname(os.path.abspath(__file__))
+    data = pd.read_csv(os.path.join(path, "../data/BTCUSD_4hours.csv"))
     data = data.drop(columns="Unnamed: 0").set_index("date")
     return data
 
@@ -53,7 +55,7 @@ def add_vol_roc(data):
 
 
 if __name__ == '__main__':
-    data = get_csv_data()
+    data= get_csv_data()
     add_ema(data)
     add_stoch_rsi(data)
     add_bollinger(data,data.log_close)
