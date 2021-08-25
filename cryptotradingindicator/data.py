@@ -1,5 +1,4 @@
 import pandas as pd
-# from cryptotradingindicator.utils import simple_time_tracker
 
 
 GCP_PATH = "gs://crypto-indicator/data/BTCUSD_2011-12-31_to_2021-08-23_4hours_Clean.csv"
@@ -7,7 +6,6 @@ LOCAL_PATH = "/home/ivanfernandes/code/timjab92/cryptotradingindicator/data/BTCU
 BUCKET_NAME="crypto-indicator"
 
 
-# @simple_time_tracker
 def get_gcp_data(nrows=10000, local=False, **kwargs):
     """method to get the training data (or a portion of it) from google cloud bucket"""
     # Add Client() here

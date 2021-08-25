@@ -1,5 +1,4 @@
 import numpy as np
-# import time
 
 def time_selection(df, timeframe):
     """
@@ -16,26 +15,3 @@ def time_selection(df, timeframe):
         return df[df['date'].dt.minute%minutes==0].dropna()
     else:
         return df.set_index("date").resample(timeframe).mean().dropna().reset_index()
-    
-    
-    
-    
-    
-    
-################
-#  DECORATORS  #
-################
-
-# def simple_time_tracker(method):
-#     def timed(*args, **kw):
-#         ts = time.time()
-#         result = method(*args, **kw)
-#         te = time.time()
-#         if 'log_time' in kw:
-#             name = kw.get('log_name', method.__name__.upper())
-#             kw['log_time'][name] = int((te - ts))
-#         else:
-#             print(method.__name__, round(te - ts, 2))
-#         return result
-
-#     return timed
