@@ -7,7 +7,7 @@ LOCAL_PATH = "/home/ivanfernandes/code/timjab92/cryptotradingindicator/data/BTCU
 BUCKET_NAME="crypto-indicator"
 
 
-@simple_time_tracker
+# @simple_time_tracker
 def get_data(nrows=10000, local=False, **kwargs):
     """method to get the training data (or a portion of it) from google cloud bucket"""
     # Add Client() here

@@ -34,4 +34,3 @@ termcolor
 streamlit
 datetime
 plotly
-time
