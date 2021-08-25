@@ -17,6 +17,7 @@ def get_train_data():
     """
     path= os.path.dirname(os.path.abspath(__file__))
     data = pd.read_csv(os.path.join(path, "../data/BTCUSD_4hours.csv"))
+    data['date'] = pd.to_datetime(data.date)
     data_train = data.drop(columns="Unnamed: 0").set_index("date")
     return data_train
 
