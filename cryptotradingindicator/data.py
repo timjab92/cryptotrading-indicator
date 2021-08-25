@@ -1,5 +1,5 @@
 import pandas as pd
-from cryptotradingindicator.utils import simple_time_tracker
+# from cryptotradingindicator.utils import simple_time_tracker
 
 
 GCP_PATH = "gs://crypto-indicator/data/BTCUSD_2011-12-31_to_2021-08-23_4hours_Clean.csv"
