@@ -23,6 +23,8 @@ google-cloud-storage
 mlflow
 s3fs
 requests
+google
+cloudstorage
 
 # utilities
 six>=1.14
@@ -32,3 +34,4 @@ termcolor
 streamlit
 datetime
 plotly
+time

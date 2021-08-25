@@ -96,14 +96,7 @@ fig.update_layout(
                            "tickprefix":'$',
                            "tickformat" : " ,.2f"})
 
-
 st.plotly_chart(fig)
-
-
-
-fig.update_layout(
-    
-)
 
 
 
