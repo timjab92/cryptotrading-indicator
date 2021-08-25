@@ -1,4 +1,4 @@
-from utils import computeRSI, stoch_rsi, get_bollinger_bands
+from cryptotradingindicator.utils import computeRSI, stoch_rsi, get_bollinger_bands
 import pandas as pd
 
 def hello_world():
