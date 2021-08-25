@@ -94,6 +94,17 @@ def add_vol_roc(data):
     data['vol_roc'] = data.volume.pct_change()
     return data
 
+## FEATURE ENGINEER THE DATA ##
+
+def feature_engineer(data):
+    """
+    Adds the EMAs, StochRSI, BollingerBands and Volume Rate of Change to the dataframe
+    """
+    add_ema(data)
+    add_stoch_rsi(data)
+    add_bollinger(data,data.log_close)
+    add_vol_roc(data)
+    return data
 
 
 
