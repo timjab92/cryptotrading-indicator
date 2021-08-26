@@ -3,7 +3,9 @@
 
 # import joblib
 # from termcolor import colored
-# from cryptotradingindicator.data import *
+from cryptotradingindicator.utils import minmaxscaling
+import numpy as np
+from cryptotradingindicator.data import *
 # from tensorflow.keras.models import Sequential
 # from tensorflow.keras.layers import SimpleRNN, LSTM
 # from tensorflow.keras import layers
@@ -14,10 +16,23 @@
 # from keras.callbacks import EarlyStopping
 # from tensorflow.keras.layers.experimental.preprocessing import Normalization
 
-# from sklearn.pipeline import Pipeline
-# from sklearn.preprocessing import MinMaxScaler
+from sklearn.pipeline import Pipeline
+
+
+#get data
+#feature engineer
+#create xy
+
 
 ## Pipeline for clean dataset
+# def testtrainsplit(data,train_percentage=80):
+#     train_len = int(len(data) * train_percentage/100)
+#     data_train = data[:train_len]
+#     data_test = data[train_len:]
+#     return data_train, data_test
+
+
+
 
 # class Trainer(object):
 #     def __init__(self, X, y):
@@ -31,9 +46,10 @@
 
 #     def set_pipeline(self):
 #         """defines the pipeline as a class attribute"""
-#         dist_pipe = Pipeline([
-# -->            ('cleandata', --> CLEANDATA()),
-# -->            ('minmax', MINMAXSCALER())
+#         clean_pipe = Pipeline([
+#             ('subsequence', subsequence())
+#             ('minmax', minmaxscaling(data_train)),
+#             ('create_xy', create_xy(data_train_scaled))
 #         ])
 
 #         self.pipeline = Pipeline([

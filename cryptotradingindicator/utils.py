@@ -1,3 +1,7 @@
+import numpy as np
+from cryptotradingindicator.data import get_train_data, feature_engineer
+from sklearn.preprocessing import MinMaxScaler
+
 ## PREPROCESSING ##
 def time_selection(df, timeframe):
     """
@@ -16,6 +20,8 @@ def time_selection(df, timeframe):
         return df[df['date'].dt.minute%minutes==0].dropna()
     else:
         return df.set_index("date").resample(timeframe).mean().dropna().reset_index()
+
+
 
 
 ## STOCH RSI ##
