@@ -32,3 +32,4 @@ termcolor
 streamlit
 datetime
 plotly
+joblib

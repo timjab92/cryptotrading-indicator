@@ -1,14 +1,17 @@
 import streamlit as st
 import pandas as pd
-import matplotlib.pyplot as plt
+import os
 import plotly.graph_objects as go
 from plotly.subplots import make_subplots
 import plotly.express as px
 # import requests
 from datetime import datetime, date, timedelta
-from tensorflow.keras.models import load_model
+from cryptotradingindicator.params import MODEL_NAME, GCP_PATH, PATH_TO_LOCAL_MODEL, BUCKET_NAME
+# from tensorflow.keras.models import load_model
 from cryptotradingindicator.data import get_xgecko, get_coingecko, get_train_data, feature_engineer, minmaxscaling
 import numpy as np
+from google.cloud import storage
+import joblib
 
 
 st.set_page_config(
@@ -18,6 +21,29 @@ st.set_page_config(
     initial_sidebar_state="auto") # collapsed
 
 
+# # # # create credentials file
+# # # google_credentials_file = os.environ["GOOGLE_APPLICATION_CREDENTIALS"]
+# # # if not os.path.isfile(google_credentials_file):
+
+# # #     print(
+# # #         "write credentials file 🔥"
+# # #         + f"\n- path: {google_credentials_file}")
+
+# # #     # retrieve credentials
+# # #     json_credentials = os.environ["GOOGLE_CREDS"]
+
+# # #     # write credentials
+# # #     with open(google_credentials_file, "w") as file:
+
+# # #         file.write(json_credentials)
+
+# # # else:
+
+# # #     print("credentials file already exists 🎉")
+    
+    
+    
+
 ##### make a checkbox that decides if use the whole data or the coin_gecko data (timeline)
 # st.checkbox("")
 # data = get_train_data()
@@ -26,13 +52,14 @@ st.set_page_config(
 data_train_scaled, scaler = minmaxscaling(feature_engineer(get_train_data())[['log_close']])
 x_gecko = get_xgecko()
 
-model = load_model("model.joblib")
-prediction = model.predict(x_gecko)
-prediction = np.exp(scaler.inverse_transform(prediction))
+# model = joblib.load("model2.joblib")
+# # model = load_model("model.joblib")
+# prediction = model.predict(x_gecko)
+# prediction = np.exp(scaler.inverse_transform(prediction))
 
-st.write(f'''
-The Bitcoin price is expected to close at around US$ {round(prediction[0][0],2)} within the next 4 hours!''')
-# "${:.2f}".format(prediction)
+# st.write(f'''
+# The Bitcoin price is expected to close at around US$ {round(prediction[0][0],2)} within the next 4 hours!''')
+# # "${:.2f}".format(prediction)
 
 
 coins = ["Bitcoin","Ethereum"]
@@ -129,6 +156,24 @@ fig.update_layout(
 
 st.plotly_chart(fig)
 
+
+
+
+
+
+# # download file
+# client = storage.Client()
+# bucket = client.bucket(BUCKET_NAME)
+# blob = bucket.blob(storage_filename)
+# blob.download_to_filename(local_filename)
+
+# # df
+# df = pd.read_csv(local_filename)
+# df
+
+# # upload file
+# upload_blob = bucket.blob(upload_storage_filename)
+# upload_blob.upload_from_filename(local_filename)
 
 
 
