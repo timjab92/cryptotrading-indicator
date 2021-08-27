@@ -1,3 +1,5 @@
+import numpy as np
+
 ## PREPROCESSING ##
 def time_selection(df, timeframe):
     """
@@ -16,6 +18,8 @@ def time_selection(df, timeframe):
         return df[df['date'].dt.minute%minutes==0].dropna()
     else:
         return df.set_index("date").resample(timeframe).mean().dropna().reset_index()
+
+
 
 
 ## STOCH RSI ##
