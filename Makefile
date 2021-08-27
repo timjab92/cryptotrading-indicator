@@ -45,7 +45,7 @@ count_lines:
 #      UPLOAD PACKAGE TO PYPI
 # ----------------------------------
 PYPI_USERNAME=<AUTHOR>
-APP_NAME = crypto-indicator
+APP_NAME = cryp2moon
 build:
 	@python setup.py sdist bdist_wheel
 
