@@ -20,8 +20,6 @@ def time_selection(df, timeframe):
         return df.set_index("date").resample(timeframe).mean().dropna().reset_index()
 
 
-
-
 ## STOCH RSI ##
 
 def computeRSI (data, window=14):
