@@ -9,7 +9,6 @@ numpy
 pandas
 scikit-learn
 matplotlib
-tensorflow
 
 # tests/linter
 black
