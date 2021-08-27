@@ -1,1 +1,1 @@
-web: sh setup.sh && streamlit run crypto_web.py
+web: pip install -U . && sh setup.sh && streamlit run crypto_web.py
