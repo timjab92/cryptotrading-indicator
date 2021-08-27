@@ -41,6 +41,7 @@ data = get_coingecko()
 data.index = pd.to_datetime(data.index, format='%Y-%m-%d')
 
 
+
 ## SIDEBAR
 st.sidebar.markdown(f"""
     # Crypto Indicator
