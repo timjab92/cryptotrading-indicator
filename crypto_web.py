@@ -2,32 +2,60 @@ import streamlit as st
 import pandas as pd
 import matplotlib.pyplot as plt
 import plotly.graph_objects as go
+from plotly.subplots import make_subplots
+import plotly.express as px
 # import requests
 from datetime import datetime, date, timedelta
+from tensorflow.keras.models import load_model
+from cryptotradingindicator.data import get_xgecko, get_coingecko, get_train_data, feature_engineer, minmaxscaling
+import numpy as np
+
 
 st.set_page_config(
-    page_title="Crypto Trading", # => Quick reference - Streamlit
+    page_title="Cryp2️Moon", # => Quick reference - Streamlit  2️⃣🌚
     page_icon="💰",
     layout="centered", # wide
     initial_sidebar_state="auto") # collapsed
 
-data = pd.read_csv("raw_data/BTC-USD.csv")
-data["Date"] = pd.to_datetime(data["Date"], format='%Y-%m-%d')
+
+##### make a checkbox that decides if use the whole data or the coin_gecko data (timeline)
+# st.checkbox("")
+# data = get_train_data()
+
+
+data_train_scaled, scaler = minmaxscaling(feature_engineer(get_train_data())[['log_close']])
+x_gecko = get_xgecko()
+
+model = load_model("model.joblib")
+prediction = model.predict(x_gecko)
+prediction = np.exp(scaler.inverse_transform(prediction))
+
+st.write(f'''
+The Bitcoin price is expected to close at around US$ {round(prediction[0][0],2)} within the next 4 hours!''')
+# "${:.2f}".format(prediction)
+
+
+coins = ["Bitcoin","Ethereum"]
+data = get_coingecko()
+# data = pd.read_csv("raw_data/BTC-USD.csv")
+data.index = pd.to_datetime(data.index, format='%Y-%m-%d')
+
 
 ## SIDEBAR
 st.sidebar.markdown(f"""
     # Crypto Indicator
     """)
 
+
 coin = st.sidebar.selectbox(label="Cryptocurrency",
-                                options=("Bitcoin",
-                                         "Ethereum"))
+                                options=coins)
+
 
 d = st.sidebar.date_input(
     "Select the start date for visualization",
-    date.today()-timedelta(days=720))
+    datetime.now()-timedelta(days=180))
 
-d=  d.strftime("%Y-%m-%d")
+d=  d.strftime('%Y-%m-%d %H:%M:%S')
 
 # RESET TO SEE ALL DATA
 # but1, but2, but3 = st.sidebar.columns(3)
@@ -40,9 +68,8 @@ if st.sidebar.button('    Reset graph    '):
 # Cryptocurrency price estimation from a LSTM algorithm
 '''
     
-mask = (data['Date'] > d) & (data['Date'] <= datetime.today())
+mask = (data.index > d) & (data.index <= datetime.now())
 filtered_data = data.loc[mask]
-
 
 # st.write('Bitcoin price')
 # fig1, ax = plt.subplots(1,1, figsize=(15,10))
@@ -52,11 +79,11 @@ filtered_data = data.loc[mask]
 # st.line_chart(data=data['Adj Close'], width=0, height=0, use_container_width=True)
 
 
-fig = go.Figure(data=[go.Candlestick(x=filtered_data['Date'],
-                open=filtered_data['Open'],
-                high=filtered_data['High'],
-                low=filtered_data['Low'],
-                close=filtered_data['Close'])])
+fig = go.Figure(data=[go.Candlestick(x=filtered_data.index,
+                open=filtered_data['open'],
+                high=filtered_data['high'],
+                low=filtered_data['low'],
+                close=filtered_data['close'])])
 fig.update_layout(
                 # title='Bitcoin price',
                 autosize=True,
@@ -88,22 +115,18 @@ fig.update_layout(
             visible=True
         ),
         type="date",
-        showgrid = False
+        showgrid = False,
+        autorange=True
     ),         
                   yaxis = {'showgrid': False, 
                            "separatethousands": True,
                            'autorange': True,
                            "tickprefix":'$',
-                           "tickformat" : " ,.2f"})
+                           "tickformat" : " ,.2f",
+                           "rangemode": "normal"})
 
 
 st.plotly_chart(fig)
-
-
-
-fig.update_layout(
-    
-)
 
 
 
