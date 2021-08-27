@@ -143,6 +143,10 @@ def get_xy(data_train_scaled, length=60, horizon=1):
 
 ## COINGECKO ##
 def get_xgecko(length=60, horizon=1):
+    """
+    Calls the coingecko API and returns the data used for prediction.
+    x_gecko.shape == (no_sequ , length, no_features)
+    """
     x_gecko = feature_engineer(get_coingecko())[['log_close']][-length:]
     #get scaler the long way
     data_train = feature_engineer(get_train_data())[['log_close']]
@@ -152,15 +156,6 @@ def get_xgecko(length=60, horizon=1):
     x_gecko = np.array(x_gecko_scaled)
     x_gecko = np.reshape(x_gecko, (horizon, length, 1))
     return x_gecko
-
-# coingecko = feature_engineer(get_coingecko())
-# x_gecko = coingecko[['log_close']][-60:]
-# x_gecko_scaled = scaler.transform(x_gecko)
-# x_gecko = np.array(x_gecko_scaled)
-# x_gecko = np.reshape(x_gecko, (1, 60, 1))
-# predictions = model.predict(x_gecko)
-# predictions = scaler.inverse_transform(predictions)
-# np.exp(predictions)
 
 
 if __name__ == '__main__':
