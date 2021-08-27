@@ -2,7 +2,7 @@ from setuptools import find_packages, setup
 
 with open('requirements.txt') as f:
     content = f.readlines()
-requirements = requirements=["streamlit", "pandas", "google-cloud-storage","numpy","plotly","datetime","matplotlib.pyplot", "tensorflow.keras.models"]
+requirements = [x.strip() for x in content if 'git+' not in x]
 
 setup(name='cryptotradingindicator',
       version="1.0",
@@ -14,6 +14,3 @@ setup(name='cryptotradingindicator',
       include_package_data=True,
       scripts=['scripts/cryptotradingindicator-run'],
       zip_safe=False)
-
-
-
