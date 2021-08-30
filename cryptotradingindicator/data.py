@@ -109,6 +109,10 @@ def feature_engineer(data):
     add_stoch_rsi(data)
     add_bollinger(data,data[CLOSE])
     add_vol_roc(data)
+    data['4h Return'] = data[CLOSE].pct_change()
+    data['4h Gradient'] = data[CLOSE].diff()
+    data['boll_width'] = data['bollinger_up'] - data['bollinger_down']
+    data['stoch_rsi'] = (data['K'] + data['D']) / 2
     return data
 
 
@@ -122,31 +126,28 @@ def minmaxscaling(data_train):
     minmax_scaler = MinMaxScaler(feature_range=(0, 1))
     minmax_scaler.fit(data_train)
     data_train_scaled = minmax_scaler.transform(data_train)
-    #    min1 = minmax_scaler.data_min_  # [5:9] for log_prices
-    #    range1 = minmax_scaler.data_range_  #[5:9]
-    return data_train_scaled, minmax_scaler
+    min1 = minmax_scaler.data_min_
+    range1 = minmax_scaler.data_range_
+    return data_train_scaled, minmax_scaler, min1, range1
 
-                                                                                            # TODO: get method from notebook
+    # TODO: get method from notebook
 ## TURN INTO SEQUENCES ##
 ## TRAINING DATA ##
-def get_xy(data_train_scaled, length=LENGTH, horizon=HORIZON):
-    y_train = []
-    x_train = [
-        data_train_scaled[i - length:i, 0] for i in range(length, len(data_train_scaled))
-        ]
-    y_train = [
-        data_train_scaled[i, 0] for i in range(length, len(data_train_scaled))
-    ]
+def get_xy(data_train_scaled, window_size=LENGTH, horizon=HORIZON):
+    data_train_subsequences = []
+    fake_y_train = []
+    for k in range(len(data_train_scaled)-(window_size-1)-horizon):
+        data_train_subsequences.append(data_train_scaled[k:k+window_size])
+        fake_y_train.append(data_train_scaled[k+window_size:k+window_size+horizon])
 
     # Convert the x_train and y_train to numpy arrays
-    x_train, y_train = np.array(x_train), np.array(y_train)
+    x_train, y_train = np.array(data_train_subsequences), np.array(
+        fake_y_train)[:, :, 0]
 
-    # Reshape the data
-    x_train = np.reshape(x_train, (x_train.shape[0], x_train.shape[1], len(SELECTED_FEATURES)))
     return x_train, y_train
 
 ## COINGECKO ##
-def get_xgecko(selected_features = SELECTED_FEATURES, length=LENGTH, horizon=HORIZON):
+def get_xgecko(selected_features = SELECTED_FEATURES, length=LENGTH):
     """
     Calls the coingecko API and returns the data used for prediction.
     x_gecko.shape == (no_sequ , length, no_features)
@@ -154,28 +155,26 @@ def get_xgecko(selected_features = SELECTED_FEATURES, length=LENGTH, horizon=HOR
     x_gecko = feature_engineer(get_coingecko())[selected_features][-length:]
     #get scaler the long way
     data_train = feature_engineer(get_train_data())[selected_features]
-    data_train_scaled, scaler = minmaxscaling(data_train)
+    data_train_scaled, scaler,min1,range1 = minmaxscaling(data_train)
 
     x_gecko_scaled = scaler.transform(x_gecko)
-    x_gecko = np.array(x_gecko_scaled)
-    x_gecko = np.reshape(x_gecko, (horizon, length, len(selected_features)))
+    x_gecko = np.array(x_gecko_scaled[-length:])
+    x_gecko = np.reshape(x_gecko, (-1, length, len(selected_features)))
     return x_gecko
 
 
 if __name__ == '__main__':
-    train_data= get_train_data()
-    add_ema(train_data)
-    add_stoch_rsi(train_data)
-    add_bollinger(train_data,train_data[CLOSE])
-    add_vol_roc(train_data)
-    print("success")
-    x_gecko = get_xgecko()
-    print("x_gecko shape")
-    print(x_gecko.shape)
+    print("fetching training data...")
     data_train = feature_engineer(get_train_data())
-    data_train_scaled, scaler = minmaxscaling(data_train[[CLOSE]])
-    # Split the data into x_train and y_train data sets
+    print("fetching x_gecko...")
+    x_gecko = get_xgecko()
+    print("x_gecko shape:")
+    print(x_gecko.shape)
+    print("scaling data...")
+    data_train_scaled, scaler,min1,range1 = minmaxscaling(data_train[[CLOSE]])
+    print("splitting data...")
     x_train, y_train = get_xy(data_train_scaled, LENGTH, HORIZON)
     print("x_train shape")
     print(x_train.shape)
+    print("y_train shape")
     print(y_train.shape)

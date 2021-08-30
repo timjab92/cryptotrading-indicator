@@ -1,7 +1,7 @@
-SELECTED_FEATURES = ['log_close']
-LENGTH = 60
-HORIZON = 1
-CLOSE = 'log_close'
+SELECTED_FEATURES = ['close']
+LENGTH = 18
+HORIZON = 3
+CLOSE = 'close'
 
 ### DATA & MODEL LOCATIONS  - - - - - - - - - - - - - - - - - - -
 
