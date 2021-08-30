@@ -54,19 +54,19 @@ x_gecko = get_xgecko()
 
 
 # @st.cache    #  put the load model into a function and it will not be reloaded every time the user changes something.
-model = get_model_from_gcp()
-    # model = joblib.load("model2.joblib")
-# # model = load_model("model.joblib")
-prediction = model.predict(x_gecko)
-prediction = np.exp(scaler.inverse_transform(prediction))
+# model = get_model_from_gcp()
+#     # model = joblib.load("model2.joblib")
+# # # model = load_model("model.joblib")
+# prediction = model.predict(x_gecko)
+# prediction = np.exp(scaler.inverse_transform(prediction))
 
-st.write(f'''
-The Bitcoin price is expected to close at around US$ {round(prediction[0][0],2)} within the next 4 hours!''')
+# st.write(f'''
+# The Bitcoin price is expected to close at around US$ {round(prediction[0][0],2)} within the next 4 hours!''')
 
 
 coins = ["Bitcoin","Ethereum"]
-data = get_train_data()
-# data = get_coingecko()s
+# data = get_train_data()
+data = get_coingecko()
 # data = pd.read_csv("raw_data/BTC-USD.csv")
 data.index = pd.to_datetime(data.index, format='%Y-%m-%d')
 
