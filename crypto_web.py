@@ -8,14 +8,16 @@ import plotly.express as px
 from datetime import datetime, date, timedelta
 from cryptotradingindicator.params import MODEL_NAME, GCP_PATH, PATH_TO_LOCAL_MODEL, BUCKET_NAME
 # from tensorflow.keras.models import load_model
+from cryptotradingindicator.gcp import get_model_from_gcp
 from cryptotradingindicator.data import get_xgecko, get_coingecko, get_train_data, feature_engineer, minmaxscaling
 import numpy as np
 from google.cloud import storage
 import joblib
+import matplotlib.pyplot as plt
 
 
 st.set_page_config(
-    page_title="Cryp2️Moon", # => Quick reference - Streamlit  2️⃣🌚
+    page_title="Cryp2️Moon", # => Quick reference - Streamlit  2️⃣🌚 🌕
     page_icon="💰",
     layout="centered", # wide
     initial_sidebar_state="auto") # collapsed
@@ -46,34 +48,39 @@ st.set_page_config(
 
 ##### make a checkbox that decides if use the whole data or the coin_gecko data (timeline)
 # st.checkbox("")
-# data = get_train_data()
-
 
 data_train_scaled, scaler = minmaxscaling(feature_engineer(get_train_data())[['log_close']])
 x_gecko = get_xgecko()
 
-# model = joblib.load("model2.joblib")
-# # model = load_model("model.joblib")
-# prediction = model.predict(x_gecko)
-# prediction = np.exp(scaler.inverse_transform(prediction))
 
-# st.write(f'''
-# The Bitcoin price is expected to close at around US$ {round(prediction[0][0],2)} within the next 4 hours!''')
-# # "${:.2f}".format(prediction)
+# @st.cache    #  put the load model into a function and it will not be reloaded every time the user changes something.
+model = get_model_from_gcp()
+    # model = joblib.load("model2.joblib")
+# # model = load_model("model.joblib")
+prediction = model.predict(x_gecko)
+prediction = np.exp(scaler.inverse_transform(prediction))
+
+st.write(f'''
+The Bitcoin price is expected to close at around US$ {round(prediction[0][0],2)} within the next 4 hours!''')
 
 
 coins = ["Bitcoin","Ethereum"]
-data = get_coingecko()
+data = get_train_data()
+# data = get_coingecko()s
 # data = pd.read_csv("raw_data/BTC-USD.csv")
 data.index = pd.to_datetime(data.index, format='%Y-%m-%d')
 
 
 
 ## SIDEBAR
+# but1, but2, but3, but4, but5 = st.sidebar.columns(5)
+# but2.markdown("# Crypto ")
+# but1.image('bitcoin 32x32.png')
+# but4.markdown("#     Indicator")
+
 st.sidebar.markdown(f"""
     # Crypto Indicator
     """)
-
 
 coin = st.sidebar.selectbox(label="Cryptocurrency",
                                 options=coins)
@@ -93,7 +100,7 @@ if st.sidebar.button('    Reset graph    '):
 
 
 '''
-# Cryptocurrency price estimation from a LSTM algorithm
+# Cryptocurrency price indicator
 '''
     
 mask = (data.index > d) & (data.index <= datetime.now())

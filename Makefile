@@ -85,7 +85,7 @@ set_project:
 	@gcloud config set project ${PROJECT_ID}
 
 create_bucket:
-    @gsutil mb -l ${REGION} -p ${PROJECT_ID} gs://${BUCKET_NAME}
+	@gsutil mb -l ${REGION} -p ${PROJECT_ID} gs://${BUCKET_NAME}
 
 # path to the file to upload to GCP (the path to the file should be absolute or should match the directory where the make command is ran)
 # replace with your local path to the `train_1k.csv` and make sure to put the path between quotes
@@ -102,9 +102,10 @@ upload_data:
 	@gsutil cp ${LOCAL_PATH} gs://${BUCKET_NAME}/${BUCKET_FOLDER}/${BUCKET_FILE_NAME}
 
 
-PYTHON_VERSION=3.7
+PYTHON_VERSION=3.7	
 FRAMEWORK=scikit-learn
 RUNTIME_VERSION=2.2
+BUCKET_TRAINING_FOLDER = models
 
 ##### Package params  - - - - - - - - - - - - - - - - - - -
 

@@ -1,6 +1,6 @@
 ### MLFLOW configuration - - - - - - - - - - - - - - - - - - -
 MLFLOW_URI = "https://mlflow.lewagon.co/"
-EXPERIMENT_NAME = "[DE] [BER] [ivan-fernandes] crypto 1"
+EXPERIMENT_NAME = "[DE] [BER] [ivan-fernandes] cryp2moon 1"
 
 ### DATA & MODEL LOCATIONS  - - - - - - - - - - - - - - - - - - -
 
@@ -35,7 +35,7 @@ BUCKET_TRAIN_DATA_PATH = 'data/BTCUSD_4hours.csv'
 ##### Model - - - - - - - - - - - - - - - - - - - - - - - -
 
 # model folder name (will contain the folders for all trained model versions)
-MODEL_NAME = 'cryp2moon'
+MODEL_NAME = 'crypto'
 
 # model version folder name (where the trained model.joblib file will be stored)
 MODEL_VERSION = 'v1'
@@ -47,4 +47,4 @@ MODEL_VERSION = 'v1'
 ### - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 
-APP_NAME = "crypto2moon"
+APP_NAME = "cryp2moon"
