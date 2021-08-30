@@ -23,6 +23,8 @@ google-cloud-storage
 mlflow
 s3fs
 requests
+fastapi
+API
 
 # utilities
 six>=1.14
@@ -32,3 +34,5 @@ termcolor
 streamlit
 datetime
 plotly
+joblib
+unicorn

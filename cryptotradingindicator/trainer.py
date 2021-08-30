@@ -1,39 +1,25 @@
-# # In this file we will implement the training of the dataset
-# # we need: class Trainer(obj)
-
 from cryptotradingindicator.data import *
 from cryptotradingindicator.utils import *
 from cryptotradingindicator.model import get_model
 from sklearn.pipeline import Pipeline
+from tensorflow.keras.models import save_model
 import joblib
 import termcolor
-
-from tensorflow.keras.models import save_model
-
-
-
-# #WORKFLOW
-# x_train, ytrain = get_xy(get_train_data)
-# trainer = Trainer()
-# trainer.fit(x_train,ytrain,......)
-# x_gecko,y_gecko = get_xy(get_coingecko)
-# trainer.predict
-
+from cryptotradingindicator.params import *
 
 
 class Trainer(object):
     def __init__(self):
         """
-            X: pandas DataFrame
-            y: pandas Series
+        This trainer has two options: train and predict.
         """
 
     def train(self):
         data_train = feature_engineer(get_train_data())
-        data_train_scaled, self.scaler = minmaxscaling(data_train[['log_close']])
+        data_train_scaled, self.scaler = minmaxscaling(data_train[[CLOSE]])
 
         # Split the data into x_train and y_train data sets
-        self.x_train, self.y_train = get_xy(data_train_scaled, 60, 1)
+        self.x_train, self.y_train = get_xy(data_train_scaled, LENGTH, HORIZON)
 
         # Train the model
         self.model = get_model(self.x_train)
@@ -41,11 +27,14 @@ class Trainer(object):
         self.model.fit(self.x_train,
                   self.y_train,
                   batch_size=8,
-                  epochs=1,
+                  epochs=10,
                   validation_split=0.4)
 
-        save_model(self.model, '../model.joblib')
-        print(termcolor.colored("saved the model locally", "green"))
+        #save_model(self.model, '../model.joblib')
+        #print(termcolor.colored("saved the model locally", "green"))
+
+        joblib.dump(self.model, '../model.joblib')
+        print(termcolor.colored("model.joblib saved locally", "green"))
 
     def predict(self):
         x_gecko = get_xgecko(60,1)
@@ -54,9 +43,6 @@ class Trainer(object):
         return np.exp(predictions)
 
 
-#        joblib.dump(self.model, '../model.joblib')
-#        print(termcolor.colored("model.joblib saved locally", "green"))
-
 if __name__ == '__main__':
     trainer = Trainer()
     trainer.train()
@@ -64,39 +50,6 @@ if __name__ == '__main__':
     predictions = trainer.predict()
     print(predictions)
     print("lets go to the moon!")
-
-
-
-
-
-
-
-
-
-
-
-    # self.pipeline = Pipeline([
-    #     ('preproc', preproc_pipe),
-    #     ('LSTM', model())
-    # ])
-
-    #     def run(self):
-    #         self.set_pipeline()
-    #         self.pipeline.fit(self.X, self.y)
-
-    #     def evaluate(self, X_test, y_test):
-    #         """evaluates the pipeline on df_test and return the AME"""
-    #         y_pred = self.pipeline.predict(X_test)
-    #-->         mae = compute_rmse(y_pred, y_test)
-    #         return round(rmse, 2)
-
-    # def save_model_locally(self):
-    #     """Save the model into a .joblib format"""
-    #     joblib.dump(self.pipeline, 'model.joblib')
-    #     print(colored("model.joblib saved locally", "green"))
-
-#--> predict
-#--> unscale
 
 # if __name__ == "__main__":
 #     # Get and clean data

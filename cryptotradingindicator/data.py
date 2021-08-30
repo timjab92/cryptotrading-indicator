@@ -4,6 +4,7 @@ import pandas as pd
 import os
 import requests
 import numpy as np
+from cryptotradingindicator.params import *
 
 
 def hello_world():
@@ -67,7 +68,8 @@ def add_ema(data, tspan=[12,26,20,50,34,55]):
     The default timeframes are 12,26,20,50,34 and 55.
     """
     for t in tspan:
-        data[f'ema{t}'] = data.log_close.ewm(span=t).mean()
+        data[f'ema{t}'] = data[CLOSE].ewm(span=t).mean()
+        data[f'dist_ema{t}'] = data[CLOSE] - data[f'ema{t}']
     return data
 
 
@@ -75,7 +77,7 @@ def add_stoch_rsi(data, d_window=3, k_window=3, window=14):
     """
     Adds stochastic RSI to the dataframe.
     """
-    data['rsi'] = computeRSI(data['log_close'], window)
+    data['rsi'] = computeRSI(data[CLOSE], window)
     data['K'], data['D'] = stoch_rsi(data['rsi'], d_window, k_window, window)
     return data
 
@@ -85,6 +87,8 @@ def add_bollinger(data, prices, rate=20):
     Adds the Bollinger Bands to the Dataframe
     """
     data['sma'], data['bollinger_up'], data['bollinger_down'] = get_bollinger_bands(prices)
+    for i in ['bollinger_up', 'bollinger_down']:
+        data[f'dist_{i}'] = data[CLOSE] - data[i]
     return data
 
 
@@ -103,7 +107,7 @@ def feature_engineer(data):
     """
     add_ema(data)
     add_stoch_rsi(data)
-    add_bollinger(data,data.log_close)
+    add_bollinger(data,data[CLOSE])
     add_vol_roc(data)
     return data
 
@@ -122,10 +126,10 @@ def minmaxscaling(data_train):
     #    range1 = minmax_scaler.data_range_  #[5:9]
     return data_train_scaled, minmax_scaler
 
-
+                                                                                            # TODO: get method from notebook
 ## TURN INTO SEQUENCES ##
 ## TRAINING DATA ##
-def get_xy(data_train_scaled, length=60, horizon=1):
+def get_xy(data_train_scaled, length=LENGTH, horizon=HORIZON):
     y_train = []
     x_train = [
         data_train_scaled[i - length:i, 0] for i in range(length, len(data_train_scaled))
@@ -138,45 +142,40 @@ def get_xy(data_train_scaled, length=60, horizon=1):
     x_train, y_train = np.array(x_train), np.array(y_train)
 
     # Reshape the data
-    x_train = np.reshape(x_train, (x_train.shape[0], x_train.shape[1], 1))
+    x_train = np.reshape(x_train, (x_train.shape[0], x_train.shape[1], len(SELECTED_FEATURES)))
     return x_train, y_train
 
 ## COINGECKO ##
-def get_xgecko(length=60, horizon=1):
-    x_gecko = feature_engineer(get_coingecko())[['log_close']][-length:]
+def get_xgecko(selected_features = SELECTED_FEATURES, length=LENGTH, horizon=HORIZON):
+    """
+    Calls the coingecko API and returns the data used for prediction.
+    x_gecko.shape == (no_sequ , length, no_features)
+    """
+    x_gecko = feature_engineer(get_coingecko())[selected_features][-length:]
     #get scaler the long way
-    data_train = feature_engineer(get_train_data())[['log_close']]
+    data_train = feature_engineer(get_train_data())[selected_features]
     data_train_scaled, scaler = minmaxscaling(data_train)
 
     x_gecko_scaled = scaler.transform(x_gecko)
     x_gecko = np.array(x_gecko_scaled)
-    x_gecko = np.reshape(x_gecko, (horizon, length, 1))
+    x_gecko = np.reshape(x_gecko, (horizon, length, len(selected_features)))
     return x_gecko
-
-# coingecko = feature_engineer(get_coingecko())
-# x_gecko = coingecko[['log_close']][-60:]
-# x_gecko_scaled = scaler.transform(x_gecko)
-# x_gecko = np.array(x_gecko_scaled)
-# x_gecko = np.reshape(x_gecko, (1, 60, 1))
-# predictions = model.predict(x_gecko)
-# predictions = scaler.inverse_transform(predictions)
-# np.exp(predictions)
 
 
 if __name__ == '__main__':
     train_data= get_train_data()
     add_ema(train_data)
     add_stoch_rsi(train_data)
-    add_bollinger(train_data,train_data.log_close)
+    add_bollinger(train_data,train_data[CLOSE])
     add_vol_roc(train_data)
     print("success")
     x_gecko = get_xgecko()
     print("x_gecko shape")
     print(x_gecko.shape)
     data_train = feature_engineer(get_train_data())
-    data_train_scaled, scaler = minmaxscaling(data_train[['log_close']])
+    data_train_scaled, scaler = minmaxscaling(data_train[[CLOSE]])
     # Split the data into x_train and y_train data sets
-    x_train, y_train = get_xy(data_train_scaled, 60, 1)
+    x_train, y_train = get_xy(data_train_scaled, LENGTH, HORIZON)
     print("x_train shape")
     print(x_train.shape)
     print(y_train.shape)
