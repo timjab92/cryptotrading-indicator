@@ -7,8 +7,8 @@ import plotly.express as px
 # import requests
 from datetime import datetime, date, timedelta
 from cryptotradingindicator.params import MODEL_NAME, GCP_PATH, PATH_TO_LOCAL_MODEL, BUCKET_NAME
-# from tensorflow.keras.models import load_model
-from cryptotradingindicator.gcp import get_model_from_gcp
+from tensorflow.keras.models import load_model
+# from cryptotradingindicator.gcp import get_model_from_gcp
 from cryptotradingindicator.data import get_xgecko, get_coingecko, get_train_data, feature_engineer, minmaxscaling
 import numpy as np
 from google.cloud import storage
@@ -56,12 +56,12 @@ x_gecko = get_xgecko()
 # @st.cache    #  put the load model into a function and it will not be reloaded every time the user changes something.
 # model = get_model_from_gcp()
 #     # model = joblib.load("model2.joblib")
-# # # model = load_model("model.joblib")
-# prediction = model.predict(x_gecko)
-# prediction = np.exp(scaler.inverse_transform(prediction))
+model = load_model("model/")
+prediction = model.predict(x_gecko)
+prediction = np.exp(scaler.inverse_transform(prediction))
 
-# st.write(f'''
-# The Bitcoin price is expected to close at around US$ {round(prediction[0][0],2)} within the next 4 hours!''')
+st.write(f'''
+The Bitcoin price is expected to close at around US$ {round(prediction[0][0],2)} within the next 4 hours!''')
 
 
 coins = ["Bitcoin","Ethereum"]
