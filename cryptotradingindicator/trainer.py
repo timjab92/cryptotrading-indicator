@@ -1,63 +1,55 @@
-# # In this file we will implement the training of the dataset
-# # we need: class Trainer(obj)
+from cryptotradingindicator.data import *
+from cryptotradingindicator.utils import *
+from cryptotradingindicator.model import get_model
+from sklearn.pipeline import Pipeline
+from tensorflow.keras.models import save_model
+import joblib
+import termcolor
+from cryptotradingindicator.params import *
 
-# import joblib
-# from termcolor import colored
-# from cryptotradingindicator.data import *
-# from tensorflow.keras.models import Sequential
-# from tensorflow.keras.layers import SimpleRNN, LSTM
-# from tensorflow.keras import layers
-# from tensorflow.keras.preprocessing.sequence import pad_sequences
-# from tensorflow.keras.layers import Masking
-# from tensorflow.keras.optimizers import RMSprop
-# from tensorflow.keras.metrics import MAPE, MeanAbsoluteError
-# from keras.callbacks import EarlyStopping
-# from tensorflow.keras.layers.experimental.preprocessing import Normalization
 
-# from sklearn.pipeline import Pipeline
-# from sklearn.preprocessing import MinMaxScaler
+class Trainer(object):
+    def __init__(self):
+        """
+        This trainer has two options: train and predict.
+        """
 
-## Pipeline for clean dataset
+    def train(self):
+        data_train = feature_engineer(get_train_data())
+        data_train_scaled, self.scaler = minmaxscaling(data_train[[CLOSE]])
 
-# class Trainer(object):
-#     def __init__(self, X, y):
-#         """
-#             X: pandas DataFrame
-#             y: pandas Series
-#         """
-#         self.pipeline = None
-#         self.X = X
-#         self.y = y
+        # Split the data into x_train and y_train data sets
+        self.x_train, self.y_train = get_xy(data_train_scaled, LENGTH, HORIZON)
 
-#     def set_pipeline(self):
-#         """defines the pipeline as a class attribute"""
-#         dist_pipe = Pipeline([
-# -->            ('cleandata', --> CLEANDATA()),
-# -->            ('minmax', MINMAXSCALER())
-#         ])
+        # Train the model
+        self.model = get_model(self.x_train)
 
-#         self.pipeline = Pipeline([
-#             ('preproc', preproc_pipe),
-#-->             ('LSTM', model())
-#         ])
+        self.model.fit(self.x_train,
+                  self.y_train,
+                  batch_size=8,
+                  epochs=10,
+                  validation_split=0.4)
 
-#     def run(self):
-#         self.set_pipeline()
-#         self.pipeline.fit(self.X, self.y)
+        #save_model(self.model, '../model.joblib')
+        #print(termcolor.colored("saved the model locally", "green"))
 
-#     def evaluate(self, X_test, y_test):
-#         """evaluates the pipeline on df_test and return the AME"""
-#         y_pred = self.pipeline.predict(X_test)
-#-->         mae = compute_rmse(y_pred, y_test)
-#         return round(rmse, 2)
+        joblib.dump(self.model, '../model.joblib')
+        print(termcolor.colored("model.joblib saved locally", "green"))
 
-#     def save_model_locally(self):
-#         """Save the model into a .joblib format"""
-#         joblib.dump(self.pipeline, 'model.joblib')
-#         print(colored("model.joblib saved locally", "green"))
+    def predict(self):
+        x_gecko = get_xgecko(60,1)
+        predictions = self.model.predict(x_gecko)
+        predictions = self.scaler.inverse_transform(predictions)
+        return np.exp(predictions)
 
-#--> predict
-#--> unscale
+
+if __name__ == '__main__':
+    trainer = Trainer()
+    trainer.train()
+    print("finished training and saved")
+    predictions = trainer.predict()
+    print(predictions)
+    print("lets go to the moon!")
 
 # if __name__ == "__main__":
 #     # Get and clean data

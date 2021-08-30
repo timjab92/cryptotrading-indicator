@@ -1,3 +1,5 @@
+import numpy as np
+
 ## PREPROCESSING ##
 def time_selection(df, timeframe):
     """
