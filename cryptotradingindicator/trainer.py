@@ -5,6 +5,7 @@ from sklearn.pipeline import Pipeline
 from tensorflow.keras.models import save_model
 import joblib
 import termcolor
+from cryptotradingindicator.params import *
 
 
 class Trainer(object):
@@ -15,10 +16,10 @@ class Trainer(object):
 
     def train(self):
         data_train = feature_engineer(get_train_data())
-        data_train_scaled, self.scaler = minmaxscaling(data_train[['log_close']])
+        data_train_scaled, self.scaler = minmaxscaling(data_train[[CLOSE]])
 
         # Split the data into x_train and y_train data sets
-        self.x_train, self.y_train = get_xy(data_train_scaled, 60, 1)
+        self.x_train, self.y_train = get_xy(data_train_scaled, LENGTH, HORIZON)
 
         # Train the model
         self.model = get_model(self.x_train)
@@ -29,8 +30,11 @@ class Trainer(object):
                   epochs=10,
                   validation_split=0.4)
 
-        save_model(self.model, '../model.joblib')
-        print(termcolor.colored("saved the model locally", "green"))
+        #save_model(self.model, '../model.joblib')
+        #print(termcolor.colored("saved the model locally", "green"))
+
+        joblib.dump(self.model, '../model.joblib')
+        print(termcolor.colored("model.joblib saved locally", "green"))
 
     def predict(self):
         x_gecko = get_xgecko(60,1)
@@ -38,9 +42,6 @@ class Trainer(object):
         predictions = self.scaler.inverse_transform(predictions)
         return np.exp(predictions)
 
-
-#        joblib.dump(self.model, '../model.joblib')
-#        print(termcolor.colored("model.joblib saved locally", "green"))
 
 if __name__ == '__main__':
     trainer = Trainer()
