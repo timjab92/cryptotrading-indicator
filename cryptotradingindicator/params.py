@@ -1,3 +1,8 @@
+SELECTED_FEATURES = ['log_close']
+LENGTH = 60
+HORIZON = 1
+CLOSE = 'log_close'
+
 ### MLFLOW configuration - - - - - - - - - - - - - - - - - - -
 MLFLOW_URI = "https://mlflow.lewagon.co/"
 EXPERIMENT_NAME = "[DE] [BER] [ivan-fernandes] cryp2moon 1"
