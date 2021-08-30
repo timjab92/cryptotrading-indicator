@@ -9,6 +9,7 @@ numpy
 pandas
 scikit-learn
 matplotlib
+tensorflow
 
 # tests/linter
 black
@@ -35,4 +36,4 @@ streamlit
 datetime
 plotly
 joblib
-unicorn
+uvicorn
