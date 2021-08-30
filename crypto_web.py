@@ -1,19 +1,15 @@
 import streamlit as st
 import pandas as pd
-import os
 import plotly.graph_objects as go
 from plotly.subplots import make_subplots
 import plotly.express as px
-# import requests
+import requests
 from datetime import datetime, date, timedelta
 from cryptotradingindicator.params import MODEL_NAME, GCP_PATH, PATH_TO_LOCAL_MODEL, BUCKET_NAME
-from tensorflow.keras.models import load_model
+# from tensorflow.keras.models import load_model
 # from cryptotradingindicator.gcp import get_model_from_gcp
 from cryptotradingindicator.data import get_xgecko, get_coingecko, get_train_data, feature_engineer, minmaxscaling
 import numpy as np
-#from google.cloud import storage
-import joblib
-import matplotlib.pyplot as plt
 
 ###SETTING SITE´S OVERHEAD
 st.set_page_config(
@@ -52,18 +48,18 @@ st.set_page_config(
 
 
 ### RETRIEVING DATASET
-data_train_scaled, scaler = minmaxscaling(feature_engineer(get_train_data())[['log_close']])
-x_gecko = get_xgecko()
+# data_train_scaled, scaler = minmaxscaling(feature_engineer(get_train_data())[['log_close']])
+# x_gecko = get_xgecko()
 
 
-# @st.cache    #  put the load model into a function and it will not be reloaded every time the user changes something.
-# model = get_model_from_gcp()
-#     # model = joblib.load("model2.joblib")
+# # @st.cache    #  put the load model into a function and it will not be reloaded every time the user changes something.
+# # model = get_model_from_gcp()
+# #     # model = joblib.load("model2.joblib")
 
-###CALLING THE MODEL AND STRING OUTPUT
-model = load_model("model/")
-prediction = model.predict(x_gecko)
-prediction = np.exp(scaler.inverse_transform(prediction))
+# ###CALLING THE MODEL AND STRING OUTPUT
+# model = load_model("model/")
+# prediction = model.predict(x_gecko)
+# prediction = np.exp(scaler.inverse_transform(prediction))
 
 # st.write(f'''
 # The Bitcoin price is expected to close at around US$ {round(prediction[0][0],2)} within the next 4 hours!'''
@@ -119,6 +115,19 @@ if st.sidebar.button('    Reset graph    '):
 st.markdown('''
 
 ''')
+
+
+
+# ## Call api
+# url = 'https://cryp2moon-idvayook4a-ew.a.run.app/predict'
+# # display prediction
+# response = requests.get(url).json()
+# st.write(
+#     f'''The Bitcoin price is expected to close at around US$ {round(response["prediction"],2)} within the next 4 hours!'''
+# )
+
+
+
 st.markdown(
     "<h1 style='text-align: center; color: #FFC300;'>Cryptocurrency Price Indicator</h1>",
     unsafe_allow_html=True)
@@ -139,8 +148,8 @@ if col2.button('    Prediction in 4 Hours    '):
         col1, col2, col3 = st.columns(3)
         if col2.button("I´ve sent my small donation "):
             st.write(f'''
-                The Bitcoin price is expected to close at around US$ {round(prediction[0][0],2)} within the next 4 hours!'''
-            )
+                The Bitcoin price is expected to close at around US$ {round(response["prediction"],2)} within the next 4 hours!'''
+                     )
     if col4.button("NO, I WANT TO KEEP LIVING MY BORING LIFE"):
         st.write(f'''
             TODO :No test
