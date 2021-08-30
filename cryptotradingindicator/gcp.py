@@ -22,6 +22,7 @@ def storage_upload(model_directory = MODEL_VERSION, bucket=BUCKET_NAME, rm=False
     if rm:
         os.remove('model.joblib')
     
+    
 def get_model_from_gcp():
     client = storage.Client().bucket(BUCKET_NAME)
     model_location = f"models/{MODEL_NAME}/{MODEL_VERSION}/{PATH_TO_LOCAL_MODEL}" 
@@ -29,3 +30,5 @@ def get_model_from_gcp():
     blob.download_to_file(PATH_TO_LOCAL_MODEL)
     return joblib.load(PATH_TO_LOCAL_MODEL)
 #  gsutil cp gs://crypto-indicator/models/crypto/v1/model.joblib .
+
+get_model_from_gcp()
