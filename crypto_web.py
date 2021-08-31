@@ -2,14 +2,13 @@ import streamlit as st
 import pandas as pd
 import plotly.graph_objects as go
 from plotly.subplots import make_subplots
-import plotly.express as px
 import requests
 from datetime import datetime, date, timedelta
 from cryptotradingindicator.params import MODEL_NAME, GCP_PATH, PATH_TO_LOCAL_MODEL, BUCKET_NAME
 # from tensorflow.keras.models import load_model
-# from cryptotradingindicator.gcp import get_model_from_gcp
-from cryptotradingindicator.data import get_xgecko, get_coingecko, get_train_data, feature_engineer, minmaxscaling
-import numpy as np
+from cryptotradingindicator.data import get_coingecko
+# from cryptotradingindicator.data import get_xgecko, get_coingecko, get_train_data, feature_engineer, minmaxscaling
+# import numpy as np
 
 ###SETTING SITE´S OVERHEAD
 st.set_page_config(
@@ -18,28 +17,6 @@ st.set_page_config(
     layout="centered", # wide
     initial_sidebar_state="auto"
     ) # collapsed
-
-
-# # # # create credentials file
-# # # google_credentials_file = os.environ["GOOGLE_APPLICATION_CREDENTIALS"]
-# # # if not os.path.isfile(google_credentials_file):
-
-# # #     print(
-# # #         "write credentials file 🔥"
-# # #         + f"\n- path: {google_credentials_file}")
-
-# # #     # retrieve credentials
-# # #     json_credentials = os.environ["GOOGLE_CREDS"]
-
-# # #     # write credentials
-# # #     with open(google_credentials_file, "w") as file:
-
-# # #         file.write(json_credentials)
-
-# # # else:
-
-# # #     print("credentials file already exists 🎉")
-
 
 
 
@@ -61,15 +38,17 @@ st.set_page_config(
 # prediction = model.predict(x_gecko)
 # prediction = np.exp(scaler.inverse_transform(prediction))
 
-# st.write(f'''
-# The Bitcoin price is expected to close at around US$ {round(prediction[0][0],2)} within the next 4 hours!'''
-# )
 
 ### RETRIEVING DATA FROM COINGECKO
 #coins = ["Bitcoin","Ethereum"]
 coins = ["₿ - Bitcoin", "💰 more coming soon..."]
 # data = get_train_data()
-data = get_coingecko()
+@st.cache
+def coin():
+    data = get_coingecko()
+    return data
+
+data = coin()
 # data = pd.read_csv("raw_data/BTC-USD.csv")
 data.index = pd.to_datetime(data.index, format='%Y-%m-%d')
 
@@ -106,10 +85,28 @@ d=  d.strftime('%Y-%m-%d %H:%M:%S')
 if st.sidebar.button('    Reset graph    '):
     d = data.Date[0]
 
-# if st.sidebar.button('    Prediction in 4 Hours    '):
-#     st.write(f'''
-#         The Bitcoin price is expected to close at around US$ {round(prediction[0][0],2)} within the next 4 hours!'''
-#              )
+
+## visualize indicators
+# EMA
+ema_curve = st.sidebar.checkbox("Do you want to visualize an EMA curve?", value = False)
+t = 1
+if ema_curve:
+    t = st.sidebar.slider(label= " Select the period for EMA", min_value = 1, max_value= 99, value = 12)
+ema = data.close.ewm(span=t).mean()
+# df.close.rolling(t).mean()  # normal moving average
+ema = ema.dropna()
+
+# Bollinger Bands
+bb_curve = st.sidebar.checkbox("Do you want to visualize the bollinger bands?", value = False)
+bb = 20
+if bb_curve:
+    bb = st.sidebar.number_input(label = "Select the rate: ", min_value=1, max_value=100, step=1, value=20)
+sma = data.close.rolling(bb).mean() # <-- Get SMA for 20 days
+std = data.close.rolling(bb).std() # <-- Get rolling standard deviation for 20 days
+bb_up = sma + std * 2 # Calculate top band
+bb_down = sma - std * 2 # Calculate bottom band
+
+
 
 ###DESIGN MAIN PART OF THE SITE
 st.markdown('''
@@ -118,14 +115,24 @@ st.markdown('''
 
 
 
-# ## Call api
-# url = 'https://cryp2moon-idvayook4a-ew.a.run.app/predict'
-# # display prediction
-# response = requests.get(url).json()
+## Call api
+@st.cache
+def load_prediction():
+    url = 'https://cryp2moon-idvayook4a-ew.a.run.app/predict'
+    # display prediction
+    response = requests.get(url).json()
+    return response
+
+
 # st.write(
-#     f'''The Bitcoin price is expected to close at around US$ {round(response["prediction"],2)} within the next 4 hours!'''
+#     f'''The Bitcoin price is expected to close at around US$ {round(load_prediction()["prediction"],2)} within the next 4 hours!'''
 # )
 
+###############
+## print message with green or red/orange colors depending on whether the price prediction is higher or lower than the actual price
+# 
+# st.success('This is a success!')
+#####################
 
 
 st.markdown(
@@ -142,18 +149,21 @@ if col2.button('    Prediction in 4 Hours    '):
     if col2.button("YES, OF COURSE"):
         st.write(f'''
             We are glad to hear that. Before continue please send a small donation of 5000 Euros to this paypal: \n
-            TIMCAREABOUTYOU@THISISNOTASCAM.COM
+            TIMCARESABOUTYOU@THISISNOTASCAM.COM
             '''
         )
         col1, col2, col3 = st.columns(3)
         if col2.button("I´ve sent my small donation "):
             st.write(f'''
-                The Bitcoin price is expected to close at around US$ {round(response["prediction"],2)} within the next 4 hours!'''
+                The Bitcoin price is expected to close at around US$ {round(load_prediction()["prediction"],2)} within the next 4 hours!'''
                      )
     if col4.button("NO, I WANT TO KEEP LIVING MY BORING LIFE"):
         st.write(f'''
-            TODO :No test
+            TODO : BORING
             ''')
+
+
+placeholder = st.empty()
 
 #TO-DO = CREATE CONECTION WITH THE MODEL
 
@@ -172,23 +182,33 @@ if col2.button('    Prediction in 4 Hours    '):
 # mask = (data.index > d) & (data.index <= datetime.now())
 # filtered_data = data.loc[mask]
 # GRAPH
-fig = go.Figure(data=[
-    go.Candlestick(
-        x=data.index,  #x=filtered_data.index,
-        open=data['open'],  #open=filtered_data['open'],
-        high=data['high'],  #high=filtered_data['high'],
-        low=data['low'],  #low=filtered_data['low'],
-        close=data['close']  #close=filtered_data['close']
-    )
-])
+
+# @st.cache(allow_output_mutation=True)
+def load_graph():
+    fig = go.Figure(data=[
+        go.Candlestick(
+            x=data.index,  #x=filtered_data.index,
+            open=data['open'],  #open=filtered_data['open'],
+            high=data['high'],  #high=filtered_data['high'],
+            low=data['low'],  #low=filtered_data['low'],
+            close=data['close']  #close=filtered_data['close']
+        )
+    ])
+    return fig
+
+# load figure
+fig = load_graph()
+
+# update figure
 fig.update_layout(
     autosize=True,
     width=750, height=350,
     margin=dict(l=40, r=40, b=40, t=40),
+    showlegend=False,
     xaxis=dict(rangeslider=dict(visible=False),
-               type="date",
-               showgrid=False,
-               autorange=True),
+            type="date",
+            showgrid=False,
+            autorange=True),
     yaxis={
         'showgrid': False,
         "separatethousands": True,
@@ -199,31 +219,26 @@ fig.update_layout(
     }
     )
 
+# add EMA curve based on user decision
+if ema_curve:
+    fig.add_trace(
+        go.Scatter(x=data.index, y=ema, line=dict(color='orange', width=1), showlegend=True, mode="lines"))
+
+# add bollinger bands based on user decision
+if bb_curve:
+    fig.add_trace(
+        go.Scatter(x=data.index, y=bb_up, line=dict(color='white', width=1), showlegend=True, mode="lines"))
+    fig.add_trace(
+        go.Scatter(x=data.index, y=bb_down, line=dict(color='white', width=1), showlegend=True, mode="lines"))
+
 
 st.plotly_chart(fig)
 
 
-# # download file
-# client = storage.Client()
-# bucket = client.bucket(BUCKET_NAME)
-# blob = bucket.blob(storage_filename)
-# blob.download_to_filename(local_filename)
-
-# # df
-# df = pd.read_csv(local_filename)
-# df
-
-# # upload file
-# upload_blob = bucket.blob(upload_storage_filename)
-# upload_blob.upload_from_filename(local_filename)
-
-## Add controlers to ask user for input
-
-## Call api
-# url = 'https://cryp2moon-idvayook4a-ew.a.run.app/predict'
+# placeholder.success(
+#     "The Bitcoin price is expected to close at around US$ " + str(round(load_prediction()["prediction"],2)) + " within the next 4 hours!")
 
 
-# # display prediction
-# response = requests.get(url).json()
-
-# st.text('The taxi ride might cost you around {0:.3g}'.format(response["prediction"]))
+placeholder.write(
+       "<p style='text-align: center'>The Bitcoin price is expected to close at around US$ " + str(round(load_prediction()["prediction"],2)) + "within the next 4 hours!</p>",
+    unsafe_allow_html=True)
