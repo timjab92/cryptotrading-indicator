@@ -232,7 +232,6 @@ if bb_curve:
 st.plotly_chart(fig)
 
 
-
 # # # # with placeholder.container():
 # # # #     prediction = load_prediction()["prediction"]
 # # # #     if data.close[-1] < prediction:
