@@ -47,9 +47,9 @@ def get_coingecko():
     #resample hourly into 4h
     volume = volume.resample("4H").mean()
 
-    #concatinate
+    #concatenate
     volume = volume[-180:]
-    data_api = data_api[-181:-1]
+    data_api = data_api[-180:]
     full = pd.concat([data_api, volume], axis=1)
     full.columns=['open', 'high', 'low', 'close', 'volume']
 
