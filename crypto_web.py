@@ -1,14 +1,10 @@
 import streamlit as st
 import pandas as pd
 import plotly.graph_objects as go
-from plotly.subplots import make_subplots
 import requests
-from datetime import datetime, date, timedelta
+from datetime import datetime, timedelta
 from cryptotradingindicator.params import MODEL_NAME, GCP_PATH, PATH_TO_LOCAL_MODEL, BUCKET_NAME
-# from tensorflow.keras.models import load_model
 from cryptotradingindicator.data import get_coingecko
-# from cryptotradingindicator.data import get_xgecko, get_coingecko, get_train_data, feature_engineer, minmaxscaling
-# import numpy as np
 
 ###SETTING SITE´S OVERHEAD
 st.set_page_config(
@@ -237,7 +233,6 @@ st.plotly_chart(fig)
 
 # placeholder.success(
 #     "The Bitcoin price is expected to close at around US$ " + str(round(load_prediction()["prediction"],2)) + " within the next 4 hours!")
-
 
 placeholder.write(
        "<p style='text-align: center'>The Bitcoin price is expected to close at around US$ " + str(round(load_prediction()["prediction"],2)) + "within the next 4 hours!</p>",
