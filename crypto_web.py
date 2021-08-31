@@ -54,10 +54,10 @@ data.index = pd.to_datetime(data.index, format='%Y-%m-%d')
 
 # GET THE CURRENT PRICE
 url = "https://api.coingecko.com/api/v3/simple/price?ids=bitcoin&vs_currencies=usd"
-current_price = requests.get(url).json()["bitcoin"]["usd"]
+current_p = requests.get(url).json()["bitcoin"]["usd"]
 # set the last close price to the current price
-data.close[-1] = current_price
-current_price = f'{current_price:9,.2f}'
+data.close[-1] = current_p
+current_price = f'{current_p:9,.2f}'
 
 
 
@@ -88,7 +88,7 @@ coin = st.sidebar.selectbox(label="Cryptocurrency",
 
 ## visualize indicators
 # EMA
-ema_curve = st.sidebar.checkbox("Visualize EMA curve", value = False)
+ema_curve = st.sidebar.checkbox("Show EMA curve", value = False)
 t = 1
 if ema_curve:
     t = st.sidebar.slider(label= " Select the period for EMA", min_value = 1, max_value= 99, value = 12)
@@ -97,7 +97,7 @@ ema = data.close.ewm(span=t).mean()
 ema = ema.dropna()
 
 # Bollinger Bands
-bb_curve = st.sidebar.checkbox("Visualize bollinger bands", value = False)
+bb_curve = st.sidebar.checkbox("Show bollinger bands", value = False)
 bb = 20
 if bb_curve:
     bb = st.sidebar.number_input(label = "Select the rate: ", min_value=1, max_value=100, step=1, value=20)
@@ -114,7 +114,6 @@ st.markdown('''
 ''')
 
 
-
 ## Call api
 @st.cache
 def load_prediction():
@@ -128,10 +127,18 @@ st.markdown(
     "<h1 style='text-align: center; color: #FFC300;'>Cryptocurrency Price Indicator</h1>",
     unsafe_allow_html=True)
 
+
+prediction = load_prediction()["prediction"]
+
+# Initialize session state for the button
+if 'button_on' not in st.session_state:
+	st.session_state.button_on = False
+
 ###BUTTON CREATION
 col1, col2, col3 = st.columns(3)
 if col2.button('    Prediction in 4 Hours    '):
-    # st.markdown(
+    st.session_state.button_on = True 
+        # st.markdown(
         # "This is a serious website who cares about you. Are you sure you wanna come to the moon with us?"
     # )
     # col1, col2, col3, col4, col5 = st.columns(5)
@@ -150,21 +157,20 @@ if col2.button('    Prediction in 4 Hours    '):
     #     st.write(f'''
     #         TODO : BORING
     #         ''')
-    prediction = load_prediction()["prediction"]
+
+perc_change = round(abs(1-prediction/current_p)*100,2)
+
+if st.session_state.button_on:
     if data.close[-1] < prediction:
         st.write(
         "<p style='text-align: center'>The Bitcoin price is expected to close at around US$ " + str(round(prediction,2)) + 
-        "🔼 within the next 4 hours!  <br> The current price of bitcoin is US$ " + current_price + " </br></p>",
+        "🔼 within the next 4 hours!  <br> The current price of bitcoin is US$ " + current_price + ". An expected " + str(perc_change) + "% increase 🤑. All in! </br></p>",
         unsafe_allow_html=True)
     else:
         st.write(
         "<p style='text-align: center'>The Bitcoin price is expected to close at around US$ " + str(round(prediction,2)) + 
-        "🔻 within the next 4 hours!  <br> The current price of bitcoin is US$ " + current_price + " </br></p>",
+        "🔻 within the next 4 hours!  <br> The current price of bitcoin is US$ " + current_price + ". An expected " + str(perc_change) + "% drop . Go short! </br></p>",
         unsafe_allow_html=True)
-
-
-
-# # # # placeholder = st.empty()
 
 
 #### CANDEL PLOT
@@ -224,7 +230,6 @@ if bb_curve:
 
 
 st.plotly_chart(fig)
-
 
 
 # # # # with placeholder.container():
