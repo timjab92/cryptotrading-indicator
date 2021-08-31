@@ -4,8 +4,9 @@ COPY api /api
 COPY cryptotradingindicator /cryptotradingindicator
 COPY model/ /model/
 COPY requirements.txt /requirements.txt
-COPY /home/ivanfernandes/code/ivan-fernandes/gcp/crypto-indicator-IF.json /credentials.json
+COPY ../crypto-indicator-IF.json /credentials.json
+COPY data/ /data/
 
 RUN pip install -r requirements.txt
 
-CMD uvicorn api.fast:crypto_web --host 0.0.0.0 --port $PORT
+CMD uvicorn api.fast:app --host 0.0.0.0 --port $PORT

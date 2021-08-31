@@ -35,4 +35,4 @@ streamlit
 datetime
 plotly
 joblib
-unicorn
+uvicorn
