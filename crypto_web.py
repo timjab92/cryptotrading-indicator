@@ -71,19 +71,19 @@ coin = st.sidebar.selectbox(label="Cryptocurrency",
                                 options=coins)
 
 
-d = st.sidebar.date_input("Select the start date for visualization",
-                          datetime.now() - timedelta(days=180),
-                          min_value=datetime.strptime("2011-12-31 08:00:00",
-                                                      "%Y-%m-%d %H:%M:%S"),
-                          max_value=  datetime.now()
-                        )
+# # # # d = st.sidebar.date_input("Select the start date for visualization",
+# # # #                           datetime.now() - timedelta(days=180),
+# # # #                           min_value=datetime.strptime("2011-12-31 08:00:00",
+# # # #                                                       "%Y-%m-%d %H:%M:%S"),
+# # # #                           max_value=  datetime.now()
+# # # #                         )
 
-d=  d.strftime('%Y-%m-%d %H:%M:%S')
+# # # # d=  d.strftime('%Y-%m-%d %H:%M:%S')
 
-### RESET TO SEE ALL DATA
-# check later this reset
-if st.sidebar.button('    Reset graph    '):
-    d = data.Date[0]
+# # # # ### RESET TO SEE ALL DATA
+# # # # # check later this reset
+# # # # if st.sidebar.button('    Reset graph    '):
+# # # #     d = data.Date[0]
 
 
 ## visualize indicators
@@ -124,17 +124,6 @@ def load_prediction():
     return response
 
 
-# st.write(
-#     f'''The Bitcoin price is expected to close at around US$ {round(load_prediction()["prediction"],2)} within the next 4 hours!'''
-# )
-
-###############
-## print message with green or red/orange colors depending on whether the price prediction is higher or lower than the actual price
-# 
-# st.success('This is a success!')
-#####################
-
-
 st.markdown(
     "<h1 style='text-align: center; color: #FFC300;'>Cryptocurrency Price Indicator</h1>",
     unsafe_allow_html=True)
@@ -142,38 +131,40 @@ st.markdown(
 ###BUTTON CREATION
 col1, col2, col3 = st.columns(3)
 if col2.button('    Prediction in 4 Hours    '):
-    st.markdown(
-        "This is a serious website who cares about you. Are you sure you wanna come to the moon with us?"
-    )
-    col1, col2, col3, col4, col5 = st.columns(5)
-    if col2.button("YES, OF COURSE"):
-        st.write(f'''
-            We are glad to hear that. Before continue please send a small donation of 5000 Euros to this paypal: \n
-            TIMCARESABOUTYOU@THISISNOTASCAM.COM
-            '''
-        )
-        col1, col2, col3 = st.columns(3)
-        if col2.button("I´ve sent my small donation "):
-            st.write(f'''
-                The Bitcoin price is expected to close at around US$ {round(load_prediction()["prediction"],2)} within the next 4 hours!'''
-                     )
-    if col4.button("NO, I WANT TO KEEP LIVING MY BORING LIFE"):
-        st.write(f'''
-            TODO : BORING
-            ''')
+    # st.markdown(
+        # "This is a serious website who cares about you. Are you sure you wanna come to the moon with us?"
+    # )
+    # col1, col2, col3, col4, col5 = st.columns(5)
+    # if col2.button("YES, OF COURSE"):
+    #     st.write(f'''
+    #         We are glad to hear that. Before continue please send a small donation of 5000 Euros to this paypal: \n
+    #         TIMCARESABOUTYOU@THISISNOTASCAM.COM
+    #         '''
+    #     )
+    #     col1, col2, col3 = st.columns(3)
+    #     if col2.button("I´ve sent my small donation "):
+    #         st.write(f'''
+    #             The Bitcoin price is expected to close at around US$ {round(load_prediction()["prediction"],2)} within the next 4 hours!'''
+    #                  )
+    # if col4.button("NO, I WANT TO KEEP LIVING MY BORING LIFE"):
+    #     st.write(f'''
+    #         TODO : BORING
+    #         ''')
+    prediction = load_prediction()["prediction"]
+    if data.close[-1] < prediction:
+        st.write(
+        "<p style='text-align: center'>The Bitcoin price is expected to close at around US$ " + str(round(prediction,2)) + 
+        "🔼 within the next 4 hours!  <br> The current price of bitcoin is US$ " + current_price + " </br></p>",
+        unsafe_allow_html=True)
+    else:
+        st.write(
+        "<p style='text-align: center'>The Bitcoin price is expected to close at around US$ " + str(round(prediction,2)) + 
+        "🔻 within the next 4 hours!  <br> The current price of bitcoin is US$ " + current_price + " </br></p>",
+        unsafe_allow_html=True)
 
 
-placeholder = st.empty()
 
-#TO-DO = CREATE CONECTION WITH THE MODEL
-
-# st.write('Bitcoin price')
-# fig1, ax = plt.subplots(1,1, figsize=(15,10))
-# ax.plot(data["Date"], data["Adj Close"])
-# ax.set_ylabel("BTC price (USD)")
-# st.write(fig1)
-# st.line_chart(data=data['Adj Close'], width=0, height=0, use_container_width=True)
-
+# # # # placeholder = st.empty()
 
 
 #### CANDEL PLOT
@@ -235,19 +226,16 @@ if bb_curve:
 st.plotly_chart(fig)
 
 
-# placeholder.success(
-#     "The Bitcoin price is expected to close at around US$ " + str(round(load_prediction()["prediction"],2)) + " within the next 4 hours!")
 
-
-with placeholder.container():
-    prediction = load_prediction()["prediction"]
-    if data.close[-1] < prediction:
-        st.write(
-        "<p style='text-align: center'>The Bitcoin price is expected to close at around US$ " + str(round(prediction,2)) + 
-        "🔼 within the next 4 hours!  <br> The current price of bitcoin is US$ " + current_price + " </br></p>",
-        unsafe_allow_html=True)
-    else:
-        st.write(
-        "<p style='text-align: center'>The Bitcoin price is expected to close at around US$ " + str(round(prediction,2)) + 
-        "🔻 within the next 4 hours!  <br> The current price of bitcoin is US$ " + current_price + " </br></p>",
-        unsafe_allow_html=True)
+# # # # with placeholder.container():
+# # # #     prediction = load_prediction()["prediction"]
+# # # #     if data.close[-1] < prediction:
+# # # #         st.write(
+# # # #         "<p style='text-align: center'>The Bitcoin price is expected to close at around US$ " + str(round(prediction,2)) + 
+# # # #         "🔼 within the next 4 hours!  <br> The current price of bitcoin is US$ " + current_price + " </br></p>",
+# # # #         unsafe_allow_html=True)
+# # # #     else:
+# # # #         st.write(
+# # # #         "<p style='text-align: center'>The Bitcoin price is expected to close at around US$ " + str(round(prediction,2)) + 
+# # # #         "🔻 within the next 4 hours!  <br> The current price of bitcoin is US$ " + current_price + " </br></p>",
+# # # #         unsafe_allow_html=True)
