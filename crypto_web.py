@@ -18,11 +18,8 @@ st.set_page_config(
     initial_sidebar_state="auto"
     ) # collapsed
 
-
-
 ##### make a checkbox that decides if use the whole data or the coin_gecko data (timeline)
 # st.checkbox("")
-
 
 
 ### RETRIEVING COMPLETE DATASET, from 201X
@@ -39,7 +36,6 @@ st.set_page_config(
 
 
 ### RETRIEVING DATA FROM COINGECKO
-#coins = ["Bitcoin","Ethereum"]
 coins = ["₿ - Bitcoin", "💰 more coming soon..."]
 # data = get_train_data()
 @st.cache(allow_output_mutation=True)
@@ -48,7 +44,6 @@ def coin():
     return data
 
 data = coin()
-
 # data = pd.read_csv("raw_data/BTC-USD.csv")
 data.index = pd.to_datetime(data.index, format='%Y-%m-%d')
 
@@ -57,17 +52,45 @@ url = "https://api.coingecko.com/api/v3/simple/price?ids=bitcoin&vs_currencies=u
 current_p = requests.get(url).json()["bitcoin"]["usd"]
 # set the last close price to the current price
 data.close[-1] = current_p
+if current_p > data.high[-1]:
+    data.high[-1] = current_p
+elif current_p < data.low[-1]:
+    data.low[-1] = current_p
+else:
+    pass        
 current_price = f'{current_p:9,.2f}'
 
+## load graph
+def load_graph():
+    fig = go.Figure(data=[
+        go.Candlestick(
+            x=data.index,  #x=filtered_data.index,
+            open=data['open'],  #open=filtered_data['open'],
+            high=data['high'],  #high=filtered_data['high'],
+            low=data['low'],  #low=filtered_data['low'],
+            close=data['close']  #close=filtered_data['close']
+        )
+    ])
+    return fig
 
+# load figure
+fig = load_graph()
 
+## Call api
+@st.cache
+def prediction():
+    url = 'https://cryp2moon-idvayook4a-ew.a.run.app/predict'
+    # display prediction
+    response = requests.get(url).json()["prediction"]
+    return response
+   
 ### SIDEBAR CONFIGURATION
 st.sidebar.markdown(
     "<h1 style='text-align: center; color: gray;'>Crypto Indicator</h1>",
     unsafe_allow_html=True
     )
 
-coin = st.sidebar.selectbox(label="Cryptocurrency",
+coins_select = st.sidebar.selectbox(label="Cryptocurrency",
                                 options=coins)
 
 
@@ -84,7 +107,6 @@ coin = st.sidebar.selectbox(label="Cryptocurrency",
 # # # # # check later this reset
 # # # # if st.sidebar.button('    Reset graph    '):
 # # # #     d = data.Date[0]
-
 
 ## visualize indicators
 # EMA
@@ -113,22 +135,9 @@ st.markdown('''
 
 ''')
 
-
-## Call api
-@st.cache
-def load_prediction():
-    url = 'https://cryp2moon-idvayook4a-ew.a.run.app/predict'
-    # display prediction
-    response = requests.get(url).json()
-    return response
-
-
 st.markdown(
     "<h1 style='text-align: center; color: #FFC300;'>Cryptocurrency Price Indicator</h1>",
     unsafe_allow_html=True)
-
-
-prediction = load_prediction()["prediction"]
 
 # Initialize session state for the button
 if 'button_on' not in st.session_state:
@@ -137,38 +146,20 @@ if 'button_on' not in st.session_state:
 ###BUTTON CREATION
 col1, col2, col3 = st.columns(3)
 if col2.button('    Prediction in 4 Hours    '):
-    st.session_state.button_on = True 
-        # st.markdown(
-        # "This is a serious website who cares about you. Are you sure you wanna come to the moon with us?"
-    # )
-    # col1, col2, col3, col4, col5 = st.columns(5)
-    # if col2.button("YES, OF COURSE"):
-    #     st.write(f'''
-    #         We are glad to hear that. Before continue please send a small donation of 5000 Euros to this paypal: \n
-    #         TIMCARESABOUTYOU@THISISNOTASCAM.COM
-    #         '''
-    #     )
-    #     col1, col2, col3 = st.columns(3)
-    #     if col2.button("I´ve sent my small donation "):
-    #         st.write(f'''
-    #             The Bitcoin price is expected to close at around US$ {round(load_prediction()["prediction"],2)} within the next 4 hours!'''
-    #                  )
-    # if col4.button("NO, I WANT TO KEEP LIVING MY BORING LIFE"):
-    #     st.write(f'''
-    #         TODO : BORING
-    #         ''')
-
-perc_change = round(abs(1-prediction/current_p)*100,2)
-
+    st.session_state.button_on = True
+    
 if st.session_state.button_on:
-    if data.close[-1] < prediction:
+    # instantiate the prediction function
+    pred = prediction()
+    perc_change = round(abs(1-pred/current_p)*100,2)
+    if data.close[-1] < pred:
         st.write(
-        "<p style='text-align: center'>The Bitcoin price is expected to close at around US$ " + str(round(prediction,2)) + 
+        "<p style='text-align: center'>The Bitcoin price is expected to close at around US$ " + str(round(pred,2)) + 
         "🔼 within the next 4 hours!  <br> The current price of bitcoin is US$ " + current_price + ". An expected " + str(perc_change) + "% increase 🤑. All in! </br></p>",
         unsafe_allow_html=True)
     else:
         st.write(
-        "<p style='text-align: center'>The Bitcoin price is expected to close at around US$ " + str(round(prediction,2)) + 
+        "<p style='text-align: center'>The Bitcoin price is expected to close at around US$ " + str(round(pred,2)) + 
         "🔻 within the next 4 hours!  <br> The current price of bitcoin is US$ " + current_price + ". An expected " + str(perc_change) + "% drop . Go short! </br></p>",
         unsafe_allow_html=True)
 
@@ -181,20 +172,8 @@ if st.session_state.button_on:
 # GRAPH
 
 # @st.cache(allow_output_mutation=True)
-def load_graph():
-    fig = go.Figure(data=[
-        go.Candlestick(
-            x=data.index,  #x=filtered_data.index,
-            open=data['open'],  #open=filtered_data['open'],
-            high=data['high'],  #high=filtered_data['high'],
-            low=data['low'],  #low=filtered_data['low'],
-            close=data['close']  #close=filtered_data['close']
-        )
-    ])
-    return fig
 
-# load figure
-fig = load_graph()
+
 
 # update figure
 fig.update_layout(
@@ -224,23 +203,25 @@ if ema_curve:
 # add bollinger bands based on user decision
 if bb_curve:
     fig.add_trace(
-        go.Scatter(x=data.index, y=bb_up, line=dict(color='white', width=1), showlegend=True, mode="lines"))
+        go.Scatter(x=data.index, y=bb_up, line=dict(color='magenta', width=1), showlegend=True, mode="lines"))
     fig.add_trace(
-        go.Scatter(x=data.index, y=bb_down, line=dict(color='white', width=1), showlegend=True, mode="lines"))
+        go.Scatter(x=data.index, y=bb_down, line=dict(color='magenta', width=1), showlegend=True, mode="lines"))
 
 
 st.plotly_chart(fig)
 
 
-# # # # with placeholder.container():
-# # # #     prediction = load_prediction()["prediction"]
-# # # #     if data.close[-1] < prediction:
-# # # #         st.write(
-# # # #         "<p style='text-align: center'>The Bitcoin price is expected to close at around US$ " + str(round(prediction,2)) + 
-# # # #         "🔼 within the next 4 hours!  <br> The current price of bitcoin is US$ " + current_price + " </br></p>",
-# # # #         unsafe_allow_html=True)
-# # # #     else:
-# # # #         st.write(
-# # # #         "<p style='text-align: center'>The Bitcoin price is expected to close at around US$ " + str(round(prediction,2)) + 
-# # # #         "🔻 within the next 4 hours!  <br> The current price of bitcoin is US$ " + current_price + " </br></p>",
-# # # #         unsafe_allow_html=True)
+
+# with placeholder.container():
+#     pred = prediction()["prediction"]
+    # perc_change = round(abs(1-pred/current_p)*100,2)
+    # if data.close[-1] < pred:
+    #     st.write(
+    #     "<p style='text-align: center'>The Bitcoin price is expected to close at around US$ " + str(round(pred,2)) + 
+    #     "🔼 within the next 4 hours!  <br> The current price of bitcoin is US$ " + current_price + ". An expected " + str(perc_change) + "% increase 🤑. All in! </br></p>",
+    #     unsafe_allow_html=True)
+    # else:
+    #     st.write(
+    #     "<p style='text-align: center'>The Bitcoin price is expected to close at around US$ " + str(round(pred,2)) + 
+    #     "🔻 within the next 4 hours!  <br> The current price of bitcoin is US$ " + current_price + ". An expected " + str(perc_change) + "% drop . Go short! </br></p>",
+    #     unsafe_allow_html=True)
