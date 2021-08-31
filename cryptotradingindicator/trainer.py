@@ -19,7 +19,7 @@ class Trainer(object):
         data_train_scaled, self.scaler, self.min1, self.range1 = minmaxscaling(data_train[[CLOSE]])
 
         # Split the data into x_train and y_train data sets
-        self.x_train, self.y_train = get_xy(data_train_scaled, LENGTH, HORIZON)
+        self.x_train, self.y_train = get_xy(data_train_scaled, WINDOW_SIZE, HORIZON)
 
         # Train the model
         self.model = get_model(self.x_train)
