@@ -8,6 +8,7 @@ wheel>=0.29
 numpy
 pandas
 sklearn
+# scikit-learn
 
 # tests/linter
 black
@@ -17,6 +18,8 @@ pytest
 yapf
 
 # API
+gcsfs
+google-cloud-storage
 s3fs
 requests
 fastapi
