@@ -1,5 +1,5 @@
 SELECTED_FEATURES = ['close']
-LENGTH = 18
+WINDOW_SIZE = 18
 HORIZON = 3
 CLOSE = 'close'
 

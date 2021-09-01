@@ -47,9 +47,9 @@ def get_coingecko():
     #resample hourly into 4h
     volume = volume.resample("4H").mean()
 
-    #concatinate
+    #concatenate
     volume = volume[-180:]
-    data_api = data_api[-181:-1]
+    data_api = data_api[-180:]
     full = pd.concat([data_api, volume], axis=1)
     full.columns=['open', 'high', 'low', 'close', 'volume']
 
@@ -133,7 +133,7 @@ def minmaxscaling(data_train):
     # TODO: get method from notebook
 ## TURN INTO SEQUENCES ##
 ## TRAINING DATA ##
-def get_xy(data_train_scaled, window_size=LENGTH, horizon=HORIZON):
+def get_xy(data_train_scaled, window_size=WINDOW_SIZE, horizon=HORIZON):
     data_train_subsequences = []
     fake_y_train = []
     for k in range(len(data_train_scaled)-(window_size-1)-horizon):
@@ -147,19 +147,19 @@ def get_xy(data_train_scaled, window_size=LENGTH, horizon=HORIZON):
     return x_train, y_train
 
 ## COINGECKO ##
-def get_xgecko(selected_features = SELECTED_FEATURES, length=LENGTH):
+def get_xgecko(selected_features = SELECTED_FEATURES, winsize=WINDOW_SIZE):
     """
     Calls the coingecko API and returns the data used for prediction.
-    x_gecko.shape == (no_sequ , length, no_features)
+    x_gecko.shape == (no_sequ , winsize, no_features)
     """
-    x_gecko = feature_engineer(get_coingecko())[selected_features][-length:]
+    x_gecko = feature_engineer(get_coingecko())[selected_features][-winsize:]
     #get scaler the long way
     data_train = feature_engineer(get_train_data())[selected_features]
     data_train_scaled, scaler,min1,range1 = minmaxscaling(data_train)
 
     x_gecko_scaled = scaler.transform(x_gecko)
-    x_gecko = np.array(x_gecko_scaled[-length:])
-    x_gecko = np.reshape(x_gecko, (-1, length, len(selected_features)))
+    x_gecko = np.array(x_gecko_scaled[-winsize:])
+    x_gecko = np.reshape(x_gecko, (-1, winsize, len(selected_features)))
     return x_gecko
 
 
@@ -173,7 +173,7 @@ if __name__ == '__main__':
     print("scaling data...")
     data_train_scaled, scaler,min1,range1 = minmaxscaling(data_train[[CLOSE]])
     print("splitting data...")
-    x_train, y_train = get_xy(data_train_scaled, LENGTH, HORIZON)
+    x_train, y_train = get_xy(data_train_scaled, WINDOW_SIZE, HORIZON)
     print("x_train shape")
     print(x_train.shape)
     print("y_train shape")
