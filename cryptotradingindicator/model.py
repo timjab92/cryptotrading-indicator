@@ -28,7 +28,7 @@ def get_model(x_train):
                        activation = "relu"
                        #activation="relu"
                       ))
-    model.add(layers.Dense(3,
+    model.add(layers.Dense(1,
                       activation = "relu"
                       #activation="relu"
                       ))
