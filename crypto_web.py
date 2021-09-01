@@ -21,9 +21,10 @@ st.set_page_config(
 
 
 ### RETRIEVING COMPLETE DATASET, from 201X
-train_data = pd.read_csv(GCP_PATH)
+# train_data = pd.read_csv(GCP_PATH)
+train_data = pd.read_csv("https://raw.githubusercontent.com/timjab92/cryptotradingindicator/master/data/BTC4h.csv")
 train_data['date'] = pd.to_datetime(train_data.date)
-train_data = train_data.drop(columns="Unnamed: 0").set_index("date")
+train_data = train_data.set_index("date")
 train_data.index = pd.to_datetime(train_data.index, format='%Y-%m-%d %H:%M')  # the 00:00 data is shown as date only, no time. Fix that later.
 train_data = train_data.dropna()
 
@@ -91,7 +92,7 @@ coins_select = st.sidebar.selectbox(label="Cryptocurrency",
 
 dd = st.sidebar.date_input("Select the start date for visualization",
                           datetime.now() - timedelta(days=8),
-                          min_value=datetime.strptime("2011-12-31 08:00",
+                          min_value=datetime.strptime(data.index[0].strftime('%Y-%m-%d %H:%M'),
                                                       "%Y-%m-%d %H:%M"),
                           max_value=  datetime.now(),
                         )
@@ -100,7 +101,8 @@ d=  dd.strftime('%Y-%m-%d %H:%M')
 # ### RESET TO SEE ALL DATA
 if st.sidebar.button('    Reset graph    '):
     d  = (datetime.now() - timedelta(days=8)).strftime('%Y-%m-%d %H:%M')
-    # d = data.index[0]
+    ema_curve = False
+    bb_curve = False
 
 selected_data = data[data.index >= d]
 selected_data_bb = data[data.index >= d]
