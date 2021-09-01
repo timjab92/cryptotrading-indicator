@@ -5,8 +5,7 @@ import plotly.graph_objects as go
 import requests
 from datetime import datetime, timedelta
 from cryptotradingindicator.params import MODEL_NAME, GCP_PATH, PATH_TO_LOCAL_MODEL, BUCKET_NAME
-from cryptotradingindicator.data import get_coingecko # , minmaxscaling
-
+from cryptotradingindicator.data import get_coingecko, feature_engineer # , minmaxscaling
 
 ###SETTING SITE´S OVERHEAD
 st.set_page_config(
@@ -56,8 +55,10 @@ current_price = f'{current_p:9,.2f}'
 data = train_data.merge(data, how='outer', left_index=True, right_index=True)
 for i in ['close','open','high','low']:
     data[i] = np.where(data[f'{i}_x'].isna(), data[f'{i}_y'], data[f'{i}_x'])
-data = data[['close','open','high','low']]
+data = data[['close','open','high','low', 'volume_x']]
+data.columns = ['close','open','high','low', 'volume']
 
+data = feature_engineer(data)
 
 ## load graph
 def load_graph(df):
@@ -79,7 +80,7 @@ def prediction():
     # display prediction
     response = requests.get(url).json()["prediction"]
     return response
-   
+
 ### SIDEBAR CONFIGURATION
 st.sidebar.markdown(
     "<h1 style='text-align: center; color: gray;'>Crypto Indicator</h1>",
@@ -128,6 +129,8 @@ std = selected_data_bb.close.rolling(bb).std() # <-- Get rolling standard deviat
 bb_up = sma + std * 2 # Calculate top band
 bb_down = sma - std * 2 # Calculate bottom band
 
+# RSI
+rsi_curve = st.sidebar.checkbox("Show stochastic RSI", value = False)
 
 ###DESIGN MAIN PART OF THE SITE
 st.markdown('''
@@ -150,15 +153,16 @@ if col2.button('    Prediction in 4 Hours    '):
 if st.session_state.button_on:
     # instantiate the prediction function
     pred = prediction()
+    price_str = f'{pred:9,.2f}'
     perc_change = round(abs(1-pred/current_p)*100,2)
     if data.close[-1] < pred:
         st.write(
-        "<p style='text-align: center'>The Bitcoin price is expected to close at around US$ " + str(round(pred,2)) + 
+        "<p style='text-align: center'>The Bitcoin price is expected to close at around US$ " + price_str + 
         "🔼 within the next 4 hours!  <br> The current price of Bitcoin is US$ " + current_price + ". An expected " + str(perc_change) + "% increase 🤑. All in! </br></p>",
         unsafe_allow_html=True)
     else:
         st.write(
-        "<p style='text-align: center'>The Bitcoin price is expected to close at around US$ " + str(round(pred,2)) + 
+        "<p style='text-align: center'>The Bitcoin price is expected to close at around US$ " + price_str + 
         "🔻 within the next 4 hours!  <br> The current price of Bitcoin is US$ " + current_price + ". An expected " + str(perc_change) + "% drop . Go short! </br></p>",
         unsafe_allow_html=True)
 
@@ -214,20 +218,45 @@ if bb_curve:
 st.plotly_chart(fig)
 
 
+def stoch_rsi(data):
+    fig2 = go.Figure()
+    fig2.add_trace(go.Scatter(x=data.index, y=data.K, mode='lines', name='K'))
+    fig2.add_trace(go.Scatter(x=data.index, y=data.D, mode='lines', name='D'))
+    fig2.add_shape(type='line',
+                   x0=data.index[0],
+                   y0=80,
+                   x1=data.index[-1],
+                   y1=80,
+                   line=dict(color='dimgrey', dash="dot", width=1),
+                   xref='x',
+                   yref='y')
+    fig2.add_shape(type='line',
+                   x0=data.index[0],
+                   y0=20,
+                   x1=data.index[-1],
+                   y1=20,
+                   line=dict(color='dimgrey', dash="dot", width=1),
+                   xref='x',
+                   yref='y')
+    fig2.update_layout(autosize=False,
+                       width=750,
+                       height=150,
+                       margin=dict(l=40, r=40, b=40, t=40),
+                       showlegend=False,
+                       xaxis=dict(rangeslider=dict(visible=False),
+                                  type="date",
+                                  showgrid=False,
+                                  autorange=True),
+                       yaxis={
+                           'showgrid': True,
+                           'autorange': True,
+                           "rangemode": "normal"
+                       })
+    return fig2
 
-# with placeholder.container():
-#     pred = prediction()["prediction"]
-    # perc_change = round(abs(1-pred/current_p)*100,2)
-    # if data.close[-1] < pred:
-    #     st.write(
-    #     "<p style='text-align: center'>The Bitcoin price is expected to close at around US$ " + str(round(pred,2)) + 
-    #     "🔼 within the next 4 hours!  <br> The current price of bitcoin is US$ " + current_price + ". An expected " + str(perc_change) + "% increase 🤑. All in! </br></p>",
-    #     unsafe_allow_html=True)
-    # else:
-    #     st.write(
-    #     "<p style='text-align: center'>The Bitcoin price is expected to close at around US$ " + str(round(pred,2)) + 
-    #     "🔻 within the next 4 hours!  <br> The current price of bitcoin is US$ " + current_price + ". An expected " + str(perc_change) + "% drop . Go short! </br></p>",
-    #     unsafe_allow_html=True)
+if rsi_curve:
+    st.plotly_chart(stoch_rsi(selected_data))
+
 
 
 if __name__ == '__main__':
