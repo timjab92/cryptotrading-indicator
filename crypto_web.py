@@ -1,13 +1,11 @@
 import streamlit as st
 import pandas as pd
+import numpy as np
 import plotly.graph_objects as go
 import requests
 from datetime import datetime, timedelta
 from cryptotradingindicator.params import MODEL_NAME, GCP_PATH, PATH_TO_LOCAL_MODEL, BUCKET_NAME
 from cryptotradingindicator.data import get_coingecko # , minmaxscaling
-
-
-GCP_PATH = "gs://crypto-indicator/data/BTCUSD_4hours.csv"
 
 
 ###SETTING SITE´S OVERHEAD
@@ -23,35 +21,29 @@ st.set_page_config(
 
 
 ### RETRIEVING COMPLETE DATASET, from 201X
-# train_data = pd.read_csv(GCP_PATH)
-# train_data['date'] = pd.to_datetime(train_data.date)
-# train_data = train_data.drop(columns="Unnamed: 0").set_index("date")
-# data_train_scaled, scaler = minmaxscaling(train_data[['log_close']])
-# x_gecko = get_xgecko()
-
-# ###CALLING THE MODEL AND STRING OUTPUT
-# model = load_model("model/")
-# prediction = model.predict(x_gecko)
-# prediction = np.exp(scaler.inverse_transform(prediction))
-
+train_data = pd.read_csv(GCP_PATH)
+train_data['date'] = pd.to_datetime(train_data.date)
+train_data = train_data.drop(columns="Unnamed: 0").set_index("date")
+train_data.index = pd.to_datetime(train_data.index, format='%Y-%m-%d %H:%M')  # the 00:00 data is shown as date only, no time. Fix that later.
+train_data = train_data.dropna()
 
 ### RETRIEVING DATA FROM COINGECKO
 coins = ["₿ - Bitcoin", "💰 more coming soon..."]
 # data = get_train_data()
-@st.cache(allow_output_mutation=True)
+@st.cache(allow_output_mutation=True, show_spinner=False)
 def coin():
-    data = get_coingecko()
-    return data
+    return get_coingecko()
 
 data = coin()
-# data = pd.read_csv("raw_data/BTC-USD.csv")
-data.index = pd.to_datetime(data.index, format='%Y-%m-%d')
+data.index = pd.to_datetime(data.index, format='%Y-%m-%d %H:%M')
+data = data.dropna()
 
 # GET THE CURRENT PRICE
 url = "https://api.coingecko.com/api/v3/simple/price?ids=bitcoin&vs_currencies=usd"
 current_p = requests.get(url).json()["bitcoin"]["usd"]
 # set the last close price to the current price
 data.close[-1] = current_p
+data.volume[-1] = data.volume[-2]
 if current_p > data.high[-1]:
     data.high[-1] = current_p
 elif current_p < data.low[-1]:
@@ -60,24 +52,27 @@ else:
     pass        
 current_price = f'{current_p:9,.2f}'
 
+data = train_data.merge(data, how='outer', left_index=True, right_index=True)
+for i in ['close','open','high','low']:
+    data[i] = np.where(data[f'{i}_x'].isna(), data[f'{i}_y'], data[f'{i}_x'])
+data = data[['close','open','high','low']]
+
+
 ## load graph
-def load_graph():
+def load_graph(df):
     fig = go.Figure(data=[
         go.Candlestick(
-            x=data.index,  #x=filtered_data.index,
-            open=data['open'],  #open=filtered_data['open'],
-            high=data['high'],  #high=filtered_data['high'],
-            low=data['low'],  #low=filtered_data['low'],
-            close=data['close']  #close=filtered_data['close']
+            x=df.index,  #x=filtered_data.index,
+            open=df['open'],  #open=filtered_data['open'],
+            high=df['high'],  #high=filtered_data['high'],
+            low=df['low'],  #low=filtered_data['low'],
+            close=df['close']  #close=filtered_data['close']
         )
     ])
     return fig
 
-# load figure
-fig = load_graph()
-
 ## Call api
-@st.cache
+@st.cache(show_spinner=False)
 def prediction():
     url = 'https://cryp2moon-idvayook4a-ew.a.run.app/predict'
     # display prediction
@@ -94,27 +89,29 @@ coins_select = st.sidebar.selectbox(label="Cryptocurrency",
                                 options=coins)
 
 
-# # # # d = st.sidebar.date_input("Select the start date for visualization",
-# # # #                           datetime.now() - timedelta(days=180),
-# # # #                           min_value=datetime.strptime("2011-12-31 08:00:00",
-# # # #                                                       "%Y-%m-%d %H:%M:%S"),
-# # # #                           max_value=  datetime.now()
-# # # #                         )
+dd = st.sidebar.date_input("Select the start date for visualization",
+                          datetime.now() - timedelta(days=8),
+                          min_value=datetime.strptime("2011-12-31 08:00",
+                                                      "%Y-%m-%d %H:%M"),
+                          max_value=  datetime.now(),
+                        )
 
-# # # # d=  d.strftime('%Y-%m-%d %H:%M:%S')
+d=  dd.strftime('%Y-%m-%d %H:%M')
+# ### RESET TO SEE ALL DATA
+if st.sidebar.button('    Reset graph    '):
+    d  = (datetime.now() - timedelta(days=8)).strftime('%Y-%m-%d %H:%M')
+    # d = data.index[0]
 
-# # # # ### RESET TO SEE ALL DATA
-# # # # # check later this reset
-# # # # if st.sidebar.button('    Reset graph    '):
-# # # #     d = data.Date[0]
+selected_data = data[data.index >= d]
+selected_data_bb = data[data.index >= d]
 
 ## visualize indicators
 # EMA
-ema_curve = st.sidebar.checkbox("Show EMA curve", value = False)
+ema_curve = st.sidebar.checkbox("Show EMA", value = False)
 t = 1
 if ema_curve:
     t = st.sidebar.slider(label= " Select the period for EMA", min_value = 1, max_value= 99, value = 12)
-ema = data.close.ewm(span=t).mean()
+ema = selected_data.close.ewm(span=t).mean()
 # df.close.rolling(t).mean()  # normal moving average
 ema = ema.dropna()
 
@@ -122,12 +119,12 @@ ema = ema.dropna()
 bb_curve = st.sidebar.checkbox("Show bollinger bands", value = False)
 bb = 20
 if bb_curve:
-    bb = st.sidebar.number_input(label = "Select the rate: ", min_value=1, max_value=100, step=1, value=20)
-sma = data.close.rolling(bb).mean() # <-- Get SMA for 20 days
-std = data.close.rolling(bb).std() # <-- Get rolling standard deviation for 20 days
+    bb = st.sidebar.number_input(label = "Select the period: ", min_value=1, max_value=100, step=1, value=20)
+    selected_data_bb = data[data.index >= (dd- timedelta(days = int(bb/5))).strftime('%Y-%m-%d %H:%M')]
+sma = selected_data_bb.close.rolling(bb).mean() # <-- Get SMA for 20 days
+std = selected_data_bb.close.rolling(bb).std() # <-- Get rolling standard deviation for 20 days
 bb_up = sma + std * 2 # Calculate top band
 bb_down = sma - std * 2 # Calculate bottom band
-
 
 
 ###DESIGN MAIN PART OF THE SITE
@@ -155,12 +152,12 @@ if st.session_state.button_on:
     if data.close[-1] < pred:
         st.write(
         "<p style='text-align: center'>The Bitcoin price is expected to close at around US$ " + str(round(pred,2)) + 
-        "🔼 within the next 4 hours!  <br> The current price of bitcoin is US$ " + current_price + ". An expected " + str(perc_change) + "% increase 🤑. All in! </br></p>",
+        "🔼 within the next 4 hours!  <br> The current price of Bitcoin is US$ " + current_price + ". An expected " + str(perc_change) + "% increase 🤑. All in! </br></p>",
         unsafe_allow_html=True)
     else:
         st.write(
         "<p style='text-align: center'>The Bitcoin price is expected to close at around US$ " + str(round(pred,2)) + 
-        "🔻 within the next 4 hours!  <br> The current price of bitcoin is US$ " + current_price + ". An expected " + str(perc_change) + "% drop . Go short! </br></p>",
+        "🔻 within the next 4 hours!  <br> The current price of Bitcoin is US$ " + current_price + ". An expected " + str(perc_change) + "% drop . Go short! </br></p>",
         unsafe_allow_html=True)
 
 
@@ -171,9 +168,10 @@ if st.session_state.button_on:
 # filtered_data = data.loc[mask]
 # GRAPH
 
-# @st.cache(allow_output_mutation=True)
 
 
+# load figure
+fig = load_graph(selected_data)
 
 # update figure
 fig.update_layout(
@@ -184,7 +182,10 @@ fig.update_layout(
     xaxis=dict(rangeslider=dict(visible=False),
             type="date",
             showgrid=False,
-            autorange=True),
+            # autorange=True,
+            range=[d,datetime.now() + timedelta(days = 1)]),
+            # xaxis_range=[datetime.datetime(2013, 10, 17),
+            #                    datetime.datetime(2013, 11, 20)]),
     yaxis={
         'showgrid': False,
         "separatethousands": True,
@@ -198,14 +199,14 @@ fig.update_layout(
 # add EMA curve based on user decision
 if ema_curve:
     fig.add_trace(
-        go.Scatter(x=data.index, y=ema, line=dict(color='orange', width=1), showlegend=True, mode="lines"))
+        go.Scatter(x=selected_data.index, y=ema, line=dict(color='orange', width=1), showlegend=True, mode="lines"))
 
 # add bollinger bands based on user decision
 if bb_curve:
     fig.add_trace(
-        go.Scatter(x=data.index, y=bb_up, line=dict(color='magenta', width=1), showlegend=True, mode="lines"))
+        go.Scatter(x=selected_data_bb.index, y=bb_up, line=dict(color='magenta', width=1), showlegend=True, mode="lines"))
     fig.add_trace(
-        go.Scatter(x=data.index, y=bb_down, line=dict(color='magenta', width=1), showlegend=True, mode="lines"))
+        go.Scatter(x=selected_data_bb.index, y=bb_down, line=dict(color='magenta', width=1), showlegend=True, mode="lines"))
 
 
 st.plotly_chart(fig)
@@ -225,3 +226,7 @@ st.plotly_chart(fig)
     #     "<p style='text-align: center'>The Bitcoin price is expected to close at around US$ " + str(round(pred,2)) + 
     #     "🔻 within the next 4 hours!  <br> The current price of bitcoin is US$ " + current_price + ". An expected " + str(perc_change) + "% drop . Go short! </br></p>",
     #     unsafe_allow_html=True)
+
+
+if __name__ == '__main__':
+    pred = prediction()
