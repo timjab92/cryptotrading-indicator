@@ -5,7 +5,6 @@ import numpy as np
 
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
-# from cryptotradingindicator.gcp import get_model_from_gcp
 from cryptotradingindicator.data import minmaxscaling, feature_engineer, get_train_data, get_xgecko
 from tensorflow.keras.models import load_model
 app = FastAPI()
