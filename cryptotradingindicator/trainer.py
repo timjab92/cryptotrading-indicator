@@ -30,7 +30,7 @@ class Trainer(object):
                   epochs=10,
                   validation_split=0.2)
 
-        save_model(self.model, '../model.joblib')
+        save_model(self.model, '../model')
         print(termcolor.colored("saved the model locally with tensorflow", "green"))
 
         #joblib.dump(self.model, '../model.joblib')
