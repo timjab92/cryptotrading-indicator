@@ -198,7 +198,7 @@ if st.session_state.button_on:
     data = data.append(pred_df)
     selected_data = selected_data.append(pred_df)
     direction = "increase" if pred > current_p else "drop"
-    if pred > 1.005 * current_p:
+    if pred > 1.002 * current_p:
         st.write(
             "<p style='text-align: center'>The Bitcoin price is expected to close at around US$ "
             + price_str +
@@ -206,7 +206,7 @@ if st.session_state.button_on:
             + current_price + ". An expected " + str(perc_change) + "% " +
             direction + " 🤑. All in! </br></p>",
             unsafe_allow_html=True)
-    elif pred < 0.995 * current_p:
+    elif pred < 0.9980 * current_p:
         st.write(
             "<p style='text-align: center'>The Bitcoin price is expected to close at around US$ "
             + price_str +
@@ -220,7 +220,7 @@ if st.session_state.button_on:
             + price_str +
             " within the next 4 hours!  <br> The current price of Bitcoin is US$ "
             + current_price + ". An expected " + str(perc_change) + "% " +
-            direction + "!</br></p>",
+            direction + "! Hold your horses! 🏇</br></p>",
             unsafe_allow_html=True)
 #### CANDLE PLOT
 
