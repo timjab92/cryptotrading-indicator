@@ -36,7 +36,7 @@ def coin():
 
 data = coin()
 data.index = pd.to_datetime(data.index, format='%Y-%m-%d %H:%M')
-data = data.dropna()
+# data.index[-1] = [datetime.now().strftime('%Y-%m-%d %H:%M')]
 
 # GET THE CURRENT PRICE
 url = "https://api.coingecko.com/api/v3/simple/price?ids=bitcoin&vs_currencies=usd"
@@ -60,18 +60,18 @@ data.columns = ['close','open','high','low', 'volume']
 
 data = feature_engineer(data)
 
-## load graph
-def load_graph(df):
-    fig = go.Figure(data=[
-        go.Candlestick(
-            x=df.index,  #x=filtered_data.index,
-            open=df['open'],  #open=filtered_data['open'],
-            high=df['high'],  #high=filtered_data['high'],
-            low=df['low'],  #low=filtered_data['low'],
-            close=df['close']  #close=filtered_data['close']
-        )
-    ])
-    return fig
+# # # ## load graph
+# # # def load_graph(df):
+# # #     fig = go.Figure(data=[
+# # #         go.Candlestick(
+# # #             x=df.index,  #x=filtered_data.index,
+# # #             open=df['open'],  #open=filtered_data['open'],
+# # #             high=df['high'],  #high=filtered_data['high'],
+# # #             low=df['low'],  #low=filtered_data['low'],
+# # #             close=df['close']  #close=filtered_data['close']
+# # #         )
+# # #     ])
+# # #     return fig
 
 ## Call api
 @st.cache(show_spinner=False)
@@ -83,7 +83,7 @@ def prediction():
 
 ### SIDEBAR CONFIGURATION
 st.sidebar.markdown(
-    "<h1 style='text-align: center; color: gray;'>Crypto Indicator</h1>",
+    "<h1 style='text-align: center; color: gray;'>Cryp2Moon</h1>",
     unsafe_allow_html=True
     )
 
@@ -132,6 +132,8 @@ bb_down = sma - std * 2 # Calculate bottom band
 # RSI
 rsi_curve = st.sidebar.checkbox("Show stochastic RSI", value = False)
 
+
+
 ###DESIGN MAIN PART OF THE SITE
 st.markdown('''
 
@@ -155,7 +157,18 @@ if st.session_state.button_on:
     pred = prediction()
     price_str = f'{pred:9,.2f}'
     perc_change = round(abs(1-pred/current_p)*100,2)
-    if data.close[-1] < pred:
+    
+    pred_df = data.iloc[-1:]
+    pred_df.open = data.close[-1]
+    pred_df.high = pred
+    pred_df.low = data.close[-1]
+    pred_df.close = pred
+    pred_df.index = pd.to_datetime([(datetime.now() + timedelta(hours=4)).strftime('%Y-%m-%d %H:%M')], format='%Y-%m-%d %H:%M')
+
+    data = data.append(pred_df)
+    selected_data = selected_data.append(pred_df)
+
+    if current_p < pred:
         st.write(
         "<p style='text-align: center'>The Bitcoin price is expected to close at around US$ " + price_str + 
         "🔼 within the next 4 hours!  <br> The current price of Bitcoin is US$ " + current_price + ". An expected " + str(perc_change) + "% increase 🤑. All in! </br></p>",
@@ -166,18 +179,34 @@ if st.session_state.button_on:
         "🔻 within the next 4 hours!  <br> The current price of Bitcoin is US$ " + current_price + ". An expected " + str(perc_change) + "% drop . Go short! </br></p>",
         unsafe_allow_html=True)
 
+#### CANDLE PLOT
 
-#### CANDEL PLOT
+def load_highlight(df):
+    highlight = go.Candlestick(
+        x=df.index[[-1]],
+        open=df.open[[-1]],
+        high=df.high[[-1]],
+        low=df.low[[-1]],
+        close=df.close[[-1]],
+        increasing={'line': {'color': 'forestgreen'}}, # cornflowerblue, springgreen, darkgoldenrod, 
+        decreasing={'line': {'color': 'darkred'}},
+        name=''
+        )
+    main_data = go.Candlestick(
+            x=df.index,  #x=filtered_data.index,
+            open=df['open'],  #open=filtered_data['open'],
+            high=df['high'],  #high=filtered_data['high'],
+            low=df['low'],  #low=filtered_data['low'],
+            close=df['close'],  #close=filtered_data['close']
+            name=''
+        )
+    if st.session_state.button_on == True:
+        fig = go.Figure(data=[main_data, highlight])
+    else:
+        fig = go.Figure(data=main_data)
+    return fig
 
-# FILTERING CANDELS
-# mask = (data.index > d) & (data.index <= datetime.now())
-# filtered_data = data.loc[mask]
-# GRAPH
-
-
-
-# load figure
-fig = load_graph(selected_data)
+fig = load_highlight(selected_data)
 
 # update figure
 fig.update_layout(
@@ -257,6 +286,21 @@ def stoch_rsi(data):
 if rsi_curve:
     st.plotly_chart(stoch_rsi(selected_data))
 
+
+
+
+st.markdown("<p> <br> </br><br> </br><br>   </br> </p>", unsafe_allow_html=True)
+# st.markdown('**DISCLAIMER**')
+st.write("<p style='text-align: justify; font-size: 80%'> <b><b> DISCLAIMER </b></b> <br>Any and all liability for losses resulting from investment transactions carried out by the user is expressly excluded by Cryp2Moon. The information made available here does not serve as a recommendation for investment. </br></p>",
+        unsafe_allow_html=True)
+# "We recommend that you contact your personal financial advisor before carrying out specific transactions and investments."
+
+
+hide_footer_style = """
+    <style>
+    .reportview-container .main footer {visibility: hidden;}    
+    """
+st.markdown(hide_footer_style, unsafe_allow_html=True)
 
 
 if __name__ == '__main__':
