@@ -6,6 +6,7 @@ import requests
 from datetime import datetime, timedelta
 from cryptotradingindicator.params import MODEL_NAME, GCP_PATH, PATH_TO_LOCAL_MODEL, BUCKET_NAME
 from cryptotradingindicator.data import get_coingecko, feature_engineer # , minmaxscaling
+import base64
 
 ###SETTING SITE´S OVERHEAD
 st.set_page_config(
@@ -86,9 +87,7 @@ def prediction():
 
 st.sidebar.markdown(
     "<h1 style='text-align: center; color: #FFC300;'>Cryp2Moon</h1>",
-    unsafe_allow_html=True)
-
-
+    unsafe_allow_html=True)  ##orange_color: #f9a01b
 
 coins_select = st.sidebar.selectbox(label="Cryptocurrency",
                                     options=coins)
@@ -138,10 +137,35 @@ rsi_curve = st.sidebar.checkbox("Show stochastic RSI", value = False)
 
 
 ###DESIGN MAIN PART OF THE SITE
-st.markdown('''
 
-''')
+##########Logo and title next to each other
 
+# LOGO_IMAGE = "logo.png"
+# st.markdown("""
+#     <style>
+#     .container {
+#         display: flex;
+#     }
+#     .logo-text {
+#         font: sans serif;
+#         font-weight:700 !important;
+#         font-size:50px !important;
+#         color: #f9a01b !important;
+#         padding-top: 1px !important;
+#     }
+#     </style>
+#     """,
+#             unsafe_allow_html=True)
+
+# st.markdown(f"""
+#     <div class="container">
+#         <img class="logo-img" src="data:image/png;base64,{base64.b64encode(open(LOGO_IMAGE, "rb").read()).decode()}">
+#         <p class="logo-text">Cryptocurrency Price Indicator</p>
+#     </div>
+#     """,
+#             unsafe_allow_html=True)
+
+##############
 st.markdown(
     "<h1 style='text-align: center; color: #FFC300;'>Cryptocurrency Price Indicator</h1>",
     unsafe_allow_html=True)
@@ -311,7 +335,7 @@ if rsi_curve:
 
 st.markdown("<p> <br> </br><br> </br><br>   </br> </p>", unsafe_allow_html=True)
 # st.markdown('**DISCLAIMER**')
-st.write("<p style='text-align: justify; font-size: 80%'> <b><b> DISCLAIMER </b></b> <br>Any and all liability for losses resulting from investment transactions carried out by the user is expressly excluded by Cryp2Moon. The information made available here does not serve as a recommendation for investment. </br></p>",
+st.write("<p style='text-align: justify; font-size: 80%'> <b><b> DISCLAIMER </b></b> <br>Cryp2Moon does not take responsibility for any losses on financial investments. This application is only for educational or entertainment purpose and offers no financial advice. Please do your own research. </br></p>",
         unsafe_allow_html=True)
 # "We recommend that you contact your personal financial advisor before carrying out specific transactions and investments."
 
