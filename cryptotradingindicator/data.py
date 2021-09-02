@@ -18,10 +18,16 @@ def get_train_data():
     Returns the raw training dataset for the price of bitcoin since 31.12.2011.
     The index is set to the date.
     """
-    path= os.path.dirname(os.path.abspath(__file__))
-    data = pd.read_csv(os.path.join(path, "../data/BTCUSD_4hours.csv"))
+    # path= os.path.dirname(os.path.abspath(__file__))
+    # data = pd.read_csv(os.path.join(path, "../data/BTCUSD_4hours.csv"))
+    # data['date'] = pd.to_datetime(data.date)
+    # data_train = data.drop(columns="Unnamed: 0").set_index("date")
+
+    data = pd.read_csv("data/BTC4h.csv")
     data['date'] = pd.to_datetime(data.date)
-    data_train = data.drop(columns="Unnamed: 0").set_index("date")
+    data = data.set_index('date')
+    return data
+
     return data_train
 
 

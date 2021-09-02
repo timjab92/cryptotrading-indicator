@@ -25,9 +25,11 @@ def index():
 @app.get("/predict")
 def predict():
 
-    data_train_scaled, scaler = minmaxscaling(feature_engineer(get_train_data())[['log_close']])
-    X = get_xgecko()
+    WINDOW_SIZE = 18
+    SELECTED_FEATURES = ['close','rsi','bollinger_up','bollinger_down','4h Return']
 
+    scaler = minmaxscaling(feature_engineer(get_train_data())[['close']])[1]
+    X = get_xgecko(selected_features = SELECTED_FEATURES, winsize=WINDOW_SIZE)
     # get model from GCP
     # model = get_model_from_gcp()
 
@@ -36,7 +38,7 @@ def predict():
     # make prediction
     pred = model.predict(X)
     # convert response from numpy to python type
-    pred = np.exp(scaler.inverse_transform(pred))
+    pred = scaler.inverse_transform(pred)
     # pred = np.append(pred,50000)
     if len(pred) ==1:
         pred = pred[0][0].tolist()
