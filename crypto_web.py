@@ -28,6 +28,7 @@ train_data.index = pd.to_datetime(train_data.index, format='%Y-%m-%d %H:%M')  # 
 train_data = train_data.dropna()
 
 ### RETRIEVING DATA FROM COINGECKO
+
 coins = ["₿ - Bitcoin", "💰 more coming soon..."]
 # data = get_train_data()
 @st.cache(allow_output_mutation=True, show_spinner=False)
@@ -49,7 +50,7 @@ if current_p > data.high[-1]:
 elif current_p < data.low[-1]:
     data.low[-1] = current_p
 else:
-    pass        
+    pass
 current_price = f'{current_p:9,.2f}'
 
 data = train_data.merge(data, how='outer', left_index=True, right_index=True)
@@ -82,13 +83,15 @@ def prediction():
     return response
 
 ### SIDEBAR CONFIGURATION
+
 st.sidebar.markdown(
-    "<h1 style='text-align: center; color: gray;'>Cryp2Moon</h1>",
-    unsafe_allow_html=True
-    )
+    "<h1 style='text-align: center; color: #FFC300;'>Cryp2Moon</h1>",
+    unsafe_allow_html=True)
+
+
 
 coins_select = st.sidebar.selectbox(label="Cryptocurrency",
-                                options=coins)
+                                    options=coins)
 
 
 dd = st.sidebar.date_input("Select the start date for visualization",
@@ -145,41 +148,58 @@ st.markdown(
 
 # Initialize session state for the button
 if 'button_on' not in st.session_state:
-	st.session_state.button_on = False
+    st.session_state.button_on = False
 
 ###BUTTON CREATION
 col1, col2, col3 = st.columns(3)
 if col2.button('    Prediction in 4 Hours    '):
     st.session_state.button_on = True
-    
+
 if st.session_state.button_on:
     # instantiate the prediction function
     pred = prediction()
     price_str = f'{pred:9,.2f}'
-    perc_change = round(abs(1-pred/current_p)*100,2)
-    
+    perc_change = round(abs(1 - pred / current_p) * 100, 2)
+
     pred_df = data.iloc[-1:]
     pred_df.open = data.close[-1]
     pred_df.high = pred
     pred_df.low = data.close[-1]
     pred_df.close = pred
-    pred_df.index = pd.to_datetime([(datetime.now() + timedelta(hours=4)).strftime('%Y-%m-%d %H:%M')], format='%Y-%m-%d %H:%M')
-
+    # pred_df.index = pd.to_datetime([(datetime.now() + timedelta(hours=4)).strftime('%Y-%m-%d %H:%M')], format='%Y-%m-%d %H:%M')
+    pred_df.index = pd.to_datetime(
+        [(selected_data.index[-1] +
+          timedelta(hours=4)).strftime('%Y-%m-%d %H:%M')],
+        format='%Y-%m-%d %H:%M')
     data = data.append(pred_df)
     selected_data = selected_data.append(pred_df)
-
-    if current_p < pred:
+    direction = "increase" if pred > current_p else "drop"
+    if pred > 1.005 * current_p:
         st.write(
-        "<p style='text-align: center'>The Bitcoin price is expected to close at around US$ " + price_str + 
-        "🔼 within the next 4 hours!  <br> The current price of Bitcoin is US$ " + current_price + ". An expected " + str(perc_change) + "% increase 🤑. All in! </br></p>",
-        unsafe_allow_html=True)
+            "<p style='text-align: center'>The Bitcoin price is expected to close at around US$ "
+            + price_str +
+            "🔼 within the next 4 hours!  <br> The current price of Bitcoin is US$ "
+            + current_price + ". An expected " + str(perc_change) + "% " +
+            direction + " 🤑. All in! </br></p>",
+            unsafe_allow_html=True)
+    elif pred < 0.995 * current_p:
+        st.write(
+            "<p style='text-align: center'>The Bitcoin price is expected to close at around US$ "
+            + price_str +
+            "🔻 within the next 4 hours!  <br> The current price of Bitcoin is US$ "
+            + current_price + ". An expected " + str(perc_change) + "% " +
+            direction + ". Go short! </br></p>",
+            unsafe_allow_html=True)
     else:
         st.write(
-        "<p style='text-align: center'>The Bitcoin price is expected to close at around US$ " + price_str + 
-        "🔻 within the next 4 hours!  <br> The current price of Bitcoin is US$ " + current_price + ". An expected " + str(perc_change) + "% drop . Go short! </br></p>",
-        unsafe_allow_html=True)
-
+            "<p style='text-align: center'>The Bitcoin price is expected to close at around US$ "
+            + price_str +
+            " within the next 4 hours!  <br> The current price of Bitcoin is US$ "
+            + current_price + ". An expected " + str(perc_change) + "% " +
+            direction + "!</br></p>",
+            unsafe_allow_html=True)
 #### CANDLE PLOT
+
 
 def load_highlight(df):
     highlight = go.Candlestick(
@@ -188,7 +208,7 @@ def load_highlight(df):
         high=df.high[[-1]],
         low=df.low[[-1]],
         close=df.close[[-1]],
-        increasing={'line': {'color': 'forestgreen'}}, # cornflowerblue, springgreen, darkgoldenrod, 
+        increasing={'line': {'color': 'forestgreen'}}, # cornflowerblue, springgreen, darkgoldenrod,
         decreasing={'line': {'color': 'darkred'}},
         name=''
         )
@@ -298,7 +318,7 @@ st.write("<p style='text-align: justify; font-size: 80%'> <b><b> DISCLAIMER </b>
 
 hide_footer_style = """
     <style>
-    .reportview-container .main footer {visibility: hidden;}    
+    .reportview-container .main footer {visibility: hidden;}
     """
 st.markdown(hide_footer_style, unsafe_allow_html=True)
 
