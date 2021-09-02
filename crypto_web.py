@@ -52,7 +52,7 @@ elif current_p < data.low[-1]:
     data.low[-1] = current_p
 else:
     pass
-current_price = f'{current_p:9,.2f}'
+current_price = f'{current_p:9,.0f}'
 
 data = train_data.merge(data, how='outer', left_index=True, right_index=True)
 for i in ['close','open','high','low']:
@@ -182,7 +182,7 @@ if col2.button('    Prediction in 4 Hours    '):
 if st.session_state.button_on:
     # instantiate the prediction function
     pred = prediction()
-    price_str = f'{pred:9,.2f}'
+    price_str = f'{pred:9,.0f}'
     perc_change = round(abs(1 - pred / current_p) * 100, 2)
 
     pred_df = data.iloc[-1:]
@@ -200,27 +200,27 @@ if st.session_state.button_on:
     direction = "increase" if pred > current_p else "drop"
     if pred > 1.002 * current_p:
         st.write(
-            "<p style='text-align: center'>The Bitcoin price is expected to close at around US$ "
+            "<p style='text-align: center'>The Bitcoin price is expected to close at around <b>US$ "
             + price_str +
-            "🔼 within the next 4 hours!  <br> The current price of Bitcoin is US$ "
-            + current_price + ". An expected " + str(perc_change) + "% " +
-            direction + " 🤑. All in! </br></p>",
+            " </b>🔼 within the next 4 hours!  <br> The current price of Bitcoin is US$ "
+            + current_price + ". An expected <b>" + str(perc_change) + "% " +
+            direction + "</b> 🤑. <b>All in! </br></p>",
             unsafe_allow_html=True)
     elif pred < 0.9980 * current_p:
         st.write(
-            "<p style='text-align: center'>The Bitcoin price is expected to close at around US$ "
+            "<p style='text-align: center'>The Bitcoin price is expected to close at around <b>US$ "
             + price_str +
-            "🔻 within the next 4 hours!  <br> The current price of Bitcoin is US$ "
-            + current_price + ". An expected " + str(perc_change) + "% " +
-            direction + ". Go short! </br></p>",
+            "</b>🔻 within the next 4 hours!  <br> The current price of Bitcoin is US$ "
+            + current_price + ". An expected <b>" + str(perc_change) + "% " +
+            direction + "</b>. <b>Go short! </br></p>",
             unsafe_allow_html=True)
     else:
         st.write(
-            "<p style='text-align: center'>The Bitcoin price is expected to close at around US$ "
+            "<p style='text-align: center'>The Bitcoin price is expected to close at around <b>US$ "
             + price_str +
-            " within the next 4 hours!  <br> The current price of Bitcoin is US$ "
-            + current_price + ". An expected " + str(perc_change) + "% " +
-            direction + "! Hold your horses! 🏇</br></p>",
+            "</b> within the next 4 hours!  <br> The current price of Bitcoin is US$ "
+            + current_price + ". An expected <b>" + str(perc_change) + "% " +
+            direction + "</b>.<b>! Hold your horses! 🏇</br></p>",
             unsafe_allow_html=True)
 #### CANDLE PLOT
 
