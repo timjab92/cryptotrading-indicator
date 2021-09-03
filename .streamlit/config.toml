@@ -1,0 +1,6 @@
+[theme]
+primaryColor = "#ffc302"#"#808080"
+#backgroundColor = "rgba(240,242,246,255)"
+#secondaryBackgroundColor = "#31333f"
+#textColor = "#ffc302" # black
+font = "sans serif" #"monospace" #"sans serif" # sheriff,

@@ -7,9 +7,8 @@ wheel>=0.29
 # data science
 numpy
 pandas
-scikit-learn
-matplotlib
-tensorflow
+sklearn
+# scikit-learn
 
 # tests/linter
 black
@@ -21,15 +20,15 @@ yapf
 # API
 gcsfs
 google-cloud-storage
-mlflow
 s3fs
 requests
+fastapi
+API
 
 # utilities
 six>=1.14
-joblib
-memoized-property
 termcolor
 streamlit
 datetime
 plotly
+uvicorn
