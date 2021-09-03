@@ -6,7 +6,6 @@ import requests
 from datetime import datetime, timedelta
 from cryptotradingindicator.params import MODEL_NAME, GCP_PATH, PATH_TO_LOCAL_MODEL, BUCKET_NAME
 from cryptotradingindicator.data import get_coingecko, feature_engineer # , minmaxscaling
-import base64
 
 ###SETTING SITE´S OVERHEAD
 st.set_page_config(
@@ -332,8 +331,9 @@ if rsi_curve:
 
 
 
+st.markdown("<p> <br> </br> </p>", unsafe_allow_html=True)
 
-st.markdown("<p> <br> </br><br> </br><br>   </br> </p>", unsafe_allow_html=True)
+# st.markdown("<p> <br> </br><br> </br><br>   </br> </p>", unsafe_allow_html=True)
 # st.markdown('**DISCLAIMER**')
 st.write("<p style='text-align: justify; font-size: 80%'> <b><b> DISCLAIMER </b></b> <br>Cryp2Moon does not take responsibility for any losses on financial investments. This application is only for educational or entertainment purpose and offers no financial advice. Please do your own research. </br></p>",
         unsafe_allow_html=True)
