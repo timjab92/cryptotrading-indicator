@@ -1,7 +1,7 @@
 # Data analysis
 - Document here the project: Cryptotradingindicator
 - Description: 
-This project was a two weeks project done by: Tim Jablonski, Frieda Tims-Jansma, Ivan Fernandes and Jhordy Mora. The objective of this was to try to predict the price of Bitcoin on a 4H timeframe using all the knowledge acquiere in the Data Science and machine learning Bootcamp in LeWagon Berlin. Using dieferent tools like web scraping and pandas for data recolecting and preocessing, github, scikit learn and tensorflow for the design of the model using Time-Series (LSTM) and Docker, Heroku and GCP for the Front-end.
+This project was a two weeks project done by: Tim Jablonski, Frieda Tims-Jansma, Ivan Fernandes and Jhordy Mora. The objective of this was to try to predict the price of Bitcoin on a 4H timeframe using all the knowledge acquired in the Data Science and machine learning Bootcamp in LeWagon Berlin. Using different tools like web scraping and pandas for data recollecting and preprocessing, github, scikit learn and tensorflow for the design of the model using Time-Series (LSTM) and Docker, Heroku and GCP for the Front-end.
 - Data Source: Gemini Exchange
 - Type of analysis: Time-Series(LSTM)
 
